@@ -567,6 +567,12 @@ class GeneticAlgorithm(object):
                 print()
             count += 1
         print("Completed evolving heuristic combination")
+        print("Now training with heuristic combination...")
+
+        # HERE
+        # reinitialize student weights and sort out other parameters
+        train_model_with_distillation(best.get_heuristic_combination(), heuristicToStudentDict, kd_loss_type, distill_optimizer, distill_lr, batch_item, student_model,
+            student_model_number, teacher_model, teacher_model_number, device)
         return best
 
 
