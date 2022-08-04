@@ -32,6 +32,57 @@ def get_lr(optimizer):
         return param_group['lr']
 
 
+def train_student(student_model, numOfEpochs, train_dl, test_dl, optimizer, max_lr, weight_decay, scheduler,
+                  grad_clip=None):
+    torch.cuda.empty_cache()
+    history = []
+
+    optimizer = optimizer(student_model.parameters(), max_lr, weight_decay=weight_decay)
+    scheduler = scheduler(optimizer, max_lr, epochs=numOfEpochs, steps_per_epoch=len(train_dl))
+
+    for epoch in range(numOfEpochs):
+        student_model.train()  # put the model in train mode
+        train_loss = []
+        train_acc = []
+        lrs = []
+        batch_count = 0
+
+        for batch in train_dl:
+
+            batch_count += 1
+            # print(batch_count)
+
+            # Normal error and update
+            loss, acc = student_model.training_step(batch)
+            train_loss.append(loss)
+            train_acc.append(acc)
+
+            loss.backward()
+
+            if grad_clip:
+                nn.utils.clip_grad_value_(student_model.parameters(), grad_clip)
+
+            optimizer.step()
+            for param in student_model.parameters():  # instead of: optimizer.zero_grad()
+                param.grad = None
+
+            # Step scheduler
+            scheduler.step()
+            lrs.append(get_lr(optimizer))
+
+        # Add results:
+        result = evaluate(student_model, test_dl)
+        result["train_loss"] = torch.stack(train_loss).mean().item()
+        result["train_acc"] = torch.stack(train_acc).mean().item()
+        result["lrs"] = lrs
+        student_model.epoch_end(epoch, result)
+        history.append(result)
+
+    torch.save(student_model.state_dict(), "../../../NeuralNetwork/resnet20.ckpt")
+    print("Student model partially trained for: " + str(numOfEpochs) + " epochs.")
+    return student_model
+
+
 def train_model(epochs, train_dl, test_dl, model, optimizer, max_lr, weight_decay, scheduler, grad_clip=None):
     torch.cuda.empty_cache()
     history = []
@@ -74,7 +125,8 @@ def train_model(epochs, train_dl, test_dl, model, optimizer, max_lr, weight_deca
     return history
 
 
-def train_model_with_distillation(heuristicString, heuristicToStudentDict, epochs, train_dl, test_dl, student_model, student_model_number, teacher_model,
+def train_model_with_distillation(heuristicString, heuristicToStudentDict, epochs, train_dl, test_dl, student_model,
+                                  student_model_number, teacher_model,
                                   teacher_model_number, device, optimizer, max_lr,
                                   weight_decay, scheduler, kd_loss_type, distill_optimizer,
                                   distill_lr,
@@ -121,7 +173,8 @@ def train_model_with_distillation(heuristicString, heuristicToStudentDict, epoch
         # For each epoch, step through GA string.
         # abcdefghijklmnopqr = to find student feature map.
         # Use random to get corresponding teacher block(1-18) and conv (1-2)
-        distill(heuristicString, heuristicToStudentDict, kd_loss_type, distill_optimizer, distill_lr, next(iter(train_dl))[0][0],
+        distill(heuristicString, heuristicToStudentDict, kd_loss_type, distill_optimizer, distill_lr,
+                next(iter(train_dl))[0][0],
                 student_model,
                 student_model_number, teacher_model, teacher_model_number, device)
 
@@ -141,3 +194,27 @@ def train_model_with_distillation(heuristicString, heuristicToStudentDict, epoch
         history.append(result)
 
     return history
+
+
+def train_model_with_distillation_only(heuristicString, heuristicToStudentDict, train_dl, test_dl,
+                                       student_model, student_model_number, teacher_model,
+                                       teacher_model_number, device, kd_loss_type, distill_optimizer,
+                                       distill_lr):
+    torch.cuda.empty_cache()
+
+    # calculate validation before distillation loss
+    result_before_distill = evaluate(student_model, test_dl)
+    # Distillation
+    # For each epoch, step through GA string.
+    # abcdefghijklmnopqr = to find student feature map.
+    # Use random to get corresponding teacher block(1-18) and conv (1-2)
+    distill(heuristicString, heuristicToStudentDict, kd_loss_type, distill_optimizer, distill_lr,
+            next(iter(train_dl))[0][0],
+            student_model,
+            student_model_number, teacher_model, teacher_model_number, device)
+
+    result_after_distill = evaluate(student_model, test_dl)
+
+    fitness = result_after_distill['val_acc'] - result_before_distill['val_acc']
+
+    return fitness

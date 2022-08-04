@@ -24,8 +24,7 @@ from torchvision.datasets import CIFAR100
 
 from os import path
 
-from NeuralNetwork.Helper import getNumberOfConvolutionLayers
-from NeuralNetwork.Print import printModelSummary, plot_acc, printFeatureMaps, printModel, show_batch
+from NeuralNetwork.Train import train_student
 from NeuralNetwork.ResNet import ResNet
 from NeuralNetwork.ResidualBlock import ResidualBlock
 from NeuralNetwork.Train import train_model, evaluate, train_model_with_distillation
@@ -539,7 +538,12 @@ class GeneticAlgorithm(object):
         kd_loss_type = trainingParameters[11]
         heuristicToStudentDict = trainingParameters[12]
 
-        trainingItems = [heuristicToStudentDict, epochs, train_dl, test_dl, student_model, student_model_number, teacher_model, teacher_model_number, device, optimizer, max_lr, weight_decay, scheduler, kd_loss_type, distill_optimizer, distill_lr, grad_clip]
+        # Train student for 1 epoch and save its weights to a file:
+        student_model = train_student(student_model, 1, train_dl, test_dl, optimizer, max_lr, weight_decay, scheduler, grad_clip)
+
+        trainingItems = [heuristicToStudentDict, epochs, train_dl, test_dl, student_model, student_model_number,
+                         teacher_model, teacher_model_number, device, optimizer, max_lr, weight_decay, scheduler,
+                         kd_loss_type, distill_optimizer, distill_lr, grad_clip]
 
         if self.print_:
             print("Generation 0")
@@ -564,3 +568,5 @@ class GeneticAlgorithm(object):
             count += 1
         print("Completed evolving heuristic combination")
         return best
+
+

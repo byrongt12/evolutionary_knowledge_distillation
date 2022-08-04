@@ -8,8 +8,11 @@
 #
 from typing import List
 
+import torch
+from os import path
+
 from GeneticAlgorithm.Solution import Solution
-from NeuralNetwork.Train import train_model_with_distillation
+from NeuralNetwork.Train import train_model_with_distillation_only
 
 
 class DistillationSolution(Solution):
@@ -67,19 +70,26 @@ class DistillationSolution(Solution):
         self.initial_solution = temp
         print(temp)
 
-        self.fitness = train_model_with_distillation(heuristicString=self.heuristic_combination,
-                                                     heuristicToStudentDict=trainingItems[0],
-                                                     epochs=trainingItems[1], train_dl=trainingItems[2],
-                                                     test_dl=trainingItems[3],
-                                                     student_model=trainingItems[4],
-                                                     student_model_number=trainingItems[5],
-                                                     teacher_model=trainingItems[6],
-                                                     teacher_model_number=trainingItems[7],
-                                                     device=trainingItems[8],
-                                                     optimizer=trainingItems[9],
-                                                     max_lr=trainingItems[10],
-                                                     weight_decay=trainingItems[11],
-                                                     scheduler=trainingItems[12],
-                                                     kd_loss_type=trainingItems[13],
-                                                     distill_optimizer=trainingItems[14],
-                                                     distill_lr=trainingItems[15], grad_clip=trainingItems[16])
+        student_model = trainingItems[4]
+
+        chk_path = "../../../NeuralNetwork/resnet20.ckpt"
+        if path.exists(chk_path):
+            student_model.load_state_dict(torch.load("../../../NeuralNetwork/resnet20.ckpt"))
+        else:
+            print("Path for student model weights does not exist.")
+            exit()
+
+        self.fitness = train_model_with_distillation_only(heuristicString=self.heuristic_combination,
+                                                          heuristicToStudentDict=trainingItems[0],
+                                                          train_dl=trainingItems[2],
+                                                          test_dl=trainingItems[3],
+                                                          student_model=trainingItems[4],
+                                                          student_model_number=trainingItems[5],
+                                                          teacher_model=trainingItems[6],
+                                                          teacher_model_number=trainingItems[7],
+                                                          device=trainingItems[8],
+                                                          kd_loss_type=trainingItems[13],
+                                                          distill_optimizer=trainingItems[14],
+                                                          distill_lr=trainingItems[15])
+
+        print(self.fitness)
