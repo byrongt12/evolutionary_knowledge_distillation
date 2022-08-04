@@ -510,12 +510,12 @@ class GeneticAlgorithm(object):
         test_dl = DataLoader(dataset=test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
         # RESNET 110
-        chk_path = "../../../NeuralNetwork/resnet110_0.7018.ckpt"
+        teacher_chk_path = "../../../NeuralNetwork/resnet110_0.7018.ckpt"
         teacher_model = None
-        if path.exists(chk_path):
+        if path.exists(teacher_chk_path):
             print("Loaded teacher model.")
             teacher_model = ResNet(ResidualBlock, [teacher_model_number, teacher_model_number, teacher_model_number])
-            teacher_model.load_state_dict(torch.load(chk_path))
+            teacher_model.load_state_dict(torch.load(teacher_chk_path))
         else:
             print("No teacher model found.")
             exit()
@@ -537,6 +537,9 @@ class GeneticAlgorithm(object):
         scheduler = trainingParameters[10]
         kd_loss_type = trainingParameters[11]
         heuristicToStudentDict = trainingParameters[12]
+
+        # Save old student weights to a file:
+        torch.save(student_model.state_dict(), "../../../NeuralNetwork/resnet20_initialized.ckpt")
 
         # Train student for 1 epoch and save its weights to a file:
         student_model = train_student(student_model, 1, train_dl, test_dl, optimizer, max_lr, weight_decay, scheduler,
@@ -572,6 +575,12 @@ class GeneticAlgorithm(object):
 
         # HERE
         # reinitialize student weights and sort out other parameters
+        student_init_chk_path = "../../../NeuralNetwork/resnet20_initialized.ckpt"
+        if path.exists(student_init_chk_path):
+            student_model.load_state_dict(torch.load(student_init_chk_path))
+        else:
+            print("Initial student weights file not found.")
+            exit()
 
         history = [evaluate(student_model, test_dl)]
         history += train_model_with_distillation(best.get_heuristic_combination(), heuristicToStudentDict, epochs, train_dl,

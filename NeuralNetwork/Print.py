@@ -10,6 +10,7 @@ import numpy as np
 
 from NeuralNetwork.Helper import getModelWeights
 
+
 def imshow(img):
     img = img / 2 + 0.5
     np_img = img.numpy()
@@ -22,6 +23,7 @@ def printModel(model, t_loader):
     yhat = model(batch[0].cuda())  # Give dummy batch to forward()
     make_dot(yhat, params=dict(list(model.named_parameters()))).render("print/rnn_torchviz_student")
     print("Model printed.")
+
 
 def printModelSummary(nn_model, firstConvWeight=False, allWeightsShape=False, summaryDisplay=True):
     if firstConvWeight or allWeightsShape:
@@ -37,6 +39,7 @@ def printModelSummary(nn_model, firstConvWeight=False, allWeightsShape=False, su
 
     if summaryDisplay:
         summary(nn_model, (3, 32, 32))
+
 
 def printFeatureMaps(model, device, train_loader):
     dataIter = iter(train_loader)
@@ -94,10 +97,13 @@ def show_batch(dl):
 
 
 def plot_acc(history):
-    plt.plot([x["val_acc"] for x in history], "-x")
+    plt.plot([x.get("train_acc") for x in history], "-bx")
+    plt.plot([x["val_acc"] for x in history], "-rx")
     plt.xlabel("Epoch")
     plt.ylabel("Accuracy")
+    plt.legend(["train acc", "val acc"])
     plt.show()
+
 
 def plot_loss(history):
     plt.plot([x.get("train_loss") for x in history], "-bx")
@@ -106,6 +112,7 @@ def plot_loss(history):
     plt.ylabel("Loss")
     plt.legend(["train loss", "val loss"])
     plt.show()
+
 
 def plot_lrs(history):
     plt.plot(np.concatenate([x.get("lrs", []) for x in history]))

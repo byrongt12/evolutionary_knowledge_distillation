@@ -39,12 +39,12 @@ class GeneticAlgorithmMain(object):
         max_lr = 0.01
 
         distill_optimizer = torch.optim.SGD
-        distill_lr = 0.1
+        distill_lr = 0.01
 
         grad_clip = 0
         weight_decay = 0
         scheduler = torch.optim.lr_scheduler.OneCycleLR
-        kd_loss_type = 'ssim'
+        kd_loss_type = 'euclidean'
 
         heuristicToStudentDict = {
             'a': 1,

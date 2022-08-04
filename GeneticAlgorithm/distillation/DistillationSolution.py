@@ -72,8 +72,8 @@ class DistillationSolution(Solution):
 
         student_model = trainingItems[4]
 
-        chk_path = "../../../NeuralNetwork/resnet20.ckpt"
-        if path.exists(chk_path):
+        student_chk_path = "../../../NeuralNetwork/resnet20.ckpt"
+        if path.exists(student_chk_path):
             student_model.load_state_dict(torch.load("../../../NeuralNetwork/resnet20.ckpt"))
         else:
             print("Path for student model weights does not exist.")
