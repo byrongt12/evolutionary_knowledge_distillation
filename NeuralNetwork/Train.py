@@ -202,14 +202,10 @@ def train_model_with_distillation_only(heuristicString, heuristicToStudentDict, 
                                        distill_lr):
     torch.cuda.empty_cache()
 
-    # calculate validation before distillation loss
     result_before_distill = evaluate(student_model, test_dl)
-    # Distillation
-    # For each epoch, step through GA string.
-    # abcdefghijklmnopqr = to find student feature map.
-    # Use random to get corresponding teacher block(1-18) and conv (1-2)
+
     distill(heuristicString, heuristicToStudentDict, kd_loss_type, distill_optimizer, distill_lr,
-            next(iter(train_dl))[0][0],
+            next(iter(train_dl))[0][0],  # HERE change to use with random batch
             student_model,
             student_model_number, teacher_model, teacher_model_number, device)
 

@@ -17,7 +17,7 @@ from GeneticAlgorithm.GeneticAlgorithm import GeneticAlgorithm
 from GeneticAlgorithm.distillation.DistillationProblem import DistillationProblem
 
 
-class GeneticAlgorithmExample(object):
+class GeneticAlgorithmMain(object):
     @classmethod
     def solve(cls):
         # This method illustrates how the selection construction hyper-heuristic in
@@ -73,7 +73,7 @@ class GeneticAlgorithmExample(object):
         print("Fitness:", solution.get_fitness())
         print("Heuristic combination: " + solution.get_heuristic_combination())
         print("Solution: ")
-        GeneticAlgorithmExample.display_solution(solution.get_solution())
+        GeneticAlgorithmMain.display_solution(solution.get_solution())
         # Print NN parameters:
         print("Hyper parameters:")
         print("Number of epochs: " + str(epochs))
@@ -98,4 +98,4 @@ class GeneticAlgorithmExample(object):
 
 
 if __name__ == '__main__':
-    GeneticAlgorithmExample.main()
+    GeneticAlgorithmMain.main()

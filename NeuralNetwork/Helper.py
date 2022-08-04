@@ -229,6 +229,13 @@ def creatParametersList(student_model, layerForStudent, blockForStudent, convFor
 def distill(heuristicString, heuristicToStudentDict, kd_loss_type, distill_optimizer, distill_lr, batch_item, student_model,
             student_model_number, teacher_model, teacher_model_number, device):
 
+    # Step through GA string.
+    # abcdefghijklmnopqr = represents student feature map.
+    # Use random to get corresponding teacher block(1-18) and conv (1-2).
+    # Compute loss from mappings between teacher and student feature map.
+    # Add add loss values from all feature map comparisons and then calculate gradients and update weights.
+
+
     student_model.train()  # put the model in train mode
 
     kd_loss_arr = []
@@ -249,10 +256,6 @@ def distill(heuristicString, heuristicToStudentDict, kd_loss_type, distill_optim
             print("Layer or block or conv is Null")
             exit()
 
-        # changeGradientBoolean(featureMapNumForStudent, student_model)
-        # printLayerAndGradientBoolean(student_model)
-        # printLayerAndGradient(student_model)
-
         # get feature map for teacher.
         random.seed(i)
         layerForTeacher = layerForStudent
@@ -261,9 +264,6 @@ def distill(heuristicString, heuristicToStudentDict, kd_loss_type, distill_optim
 
         featureMapNumForTeacher = ((layerForTeacher - 1) * (teacher_model_number * 2)) + (
                 (blockForTeacher - 1) * 2) + convForTeacher
-
-        # print(featureMapNumForStudent)
-        # print(featureMapNumForTeacher)
 
         image = batch_item
 
@@ -291,8 +291,6 @@ def distill(heuristicString, heuristicToStudentDict, kd_loss_type, distill_optim
 
     total_loss = sum(kd_loss_arr)
     total_loss.backward()
-    # clip gradients?
     distill_optimizer_implemented.step()
     distill_optimizer_implemented.zero_grad()
-    # resetGradientBoolean(student_model)
 

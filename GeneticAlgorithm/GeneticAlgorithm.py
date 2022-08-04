@@ -28,7 +28,7 @@ from NeuralNetwork.Train import train_student
 from NeuralNetwork.ResNet import ResNet
 from NeuralNetwork.ResidualBlock import ResidualBlock
 from NeuralNetwork.Train import train_model, evaluate, train_model_with_distillation
-
+from NeuralNetwork.Print import plot_acc, plot_loss
 
 class GeneticAlgorithm(object):
     # Data elements
@@ -539,7 +539,8 @@ class GeneticAlgorithm(object):
         heuristicToStudentDict = trainingParameters[12]
 
         # Train student for 1 epoch and save its weights to a file:
-        student_model = train_student(student_model, 1, train_dl, test_dl, optimizer, max_lr, weight_decay, scheduler, grad_clip)
+        student_model = train_student(student_model, 1, train_dl, test_dl, optimizer, max_lr, weight_decay, scheduler,
+                                      grad_clip)
 
         trainingItems = [heuristicToStudentDict, epochs, train_dl, test_dl, student_model, student_model_number,
                          teacher_model, teacher_model_number, device, optimizer, max_lr, weight_decay, scheduler,
@@ -571,8 +572,14 @@ class GeneticAlgorithm(object):
 
         # HERE
         # reinitialize student weights and sort out other parameters
-        train_model_with_distillation(best.get_heuristic_combination(), heuristicToStudentDict, kd_loss_type, distill_optimizer, distill_lr, batch_item, student_model,
-            student_model_number, teacher_model, teacher_model_number, device)
+
+        history = [evaluate(student_model, test_dl)]
+        history += train_model_with_distillation(best.get_heuristic_combination(), heuristicToStudentDict, epochs, train_dl,
+                                      test_dl, student_model, student_model_number, teacher_model, teacher_model_number,
+                                      device, optimizer, max_lr,
+                                      weight_decay, scheduler, kd_loss_type, distill_optimizer,
+                                      distill_lr, grad_clip, normalTrain=True)
+        plot_acc(history)
+        plot_loss(history)
+
         return best
-
-
