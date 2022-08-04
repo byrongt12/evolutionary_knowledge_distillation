@@ -257,6 +257,8 @@ def distill(heuristicString, heuristicToStudentDict, kd_loss_type, distill_optim
             exit()
 
         # get feature map for teacher.
+        # HERE need to change teacher map selection! and check loss function
+
         random.seed(i)
         layerForTeacher = layerForStudent
         blockForTeacher = random.randint(1, teacher_model_number)
