@@ -245,27 +245,31 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimiz
     for i in range(0, len(heuristicString)):
         if (i + 1) % 2 != 0:
             # student layer
-            student_layer_number = heuristicToLayerDict[heuristicString[i]] % student_model_number
+            student_layer_number = heuristicToLayerDict[heuristicString[i]] % (student_model_number * 3 * 2)
             if student_layer_number == 0:
-                student_layer_number = student_model_number
+                student_layer_number = (student_model_number * 3 * 2)
             featureMapNumForStudentArr.append(student_layer_number)
         else:
             # teacher layer
-            featureMapNumForTeacherArr.append(heuristicToLayerDict[heuristicString[i]])
+            layerForStudent, blockForStudent, convForStudent = convertLayerToCode(student_model_number,
+                                                                                  student_layer_number)
+            layerForTeacher = layerForStudent
+
+            teacher_layer_number = ((layerForTeacher - 1) * teacher_model_number * 2) + heuristicToLayerDict[
+                heuristicString[i]]
+
+            featureMapNumForTeacherArr.append(teacher_layer_number)
 
     if len(heuristicString) % 2 != 0:
         # featureMapNumForStudentArr > featureMapNumForTeacherArr, so add random teacher layer
         layerForStudent, blockForStudent, convForStudent = convertLayerToCode(student_model_number,
                                                                               featureMapNumForStudentArr[-1])
-        random.seed(len(featureMapNumForStudentArr))
+
         layerForTeacher = layerForStudent
-        blockForTeacher = random.randint(1, teacher_model_number)
-        convForTeacher = random.randint(1, 2)
 
-        featureMapNumForTeacher = ((layerForTeacher - 1) * (teacher_model_number * 2)) + (
-                (blockForTeacher - 1) * 2) + convForTeacher
+        teacher_layer_number = ((layerForTeacher - 1) * teacher_model_number * 2) + (2 * teacher_model_number)
 
-        featureMapNumForTeacherArr.append(featureMapNumForTeacher)
+        featureMapNumForTeacherArr.append(teacher_layer_number)
 
     for i in range(0, (len(featureMapNumForStudentArr))):
         featureMapNumForStudent = featureMapNumForStudentArr[i]
@@ -287,9 +291,9 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimiz
             # Loss functions: Cosine, SSIM, PSNR and Euclidean dist
             distill_loss = 0
             if kd_loss_type == 'ssim':
-                distill_loss = 1 - ssim_loss(s, t, max_val=1.0, window_size=1)
+                distill_loss = ssim_loss(s, t, max_val=1.0, window_size=1)
             elif kd_loss_type == 'psnr':
-                distill_loss = 1 - psnr_loss(s, t, max_val=1.0)
+                distill_loss = psnr_loss(s, t, max_val=1.0)
             elif kd_loss_type == 'cosine':
                 distill_loss = F.cosine_similarity(t.reshape(1, -1), s.reshape(1, -1))
             elif kd_loss_type == 'euclidean':
@@ -297,11 +301,7 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimiz
 
             kd_loss_arr.append(distill_loss)
 
-        total_loss = sum(kd_loss_arr)
-        if i == len(featureMapNumForStudentArr) - 1:
-            total_loss.backward()
-        else:
-            total_loss.backward(retain_graph=True)
-
+    total_loss = sum(kd_loss_arr)
+    total_loss.backward()
     distill_optimizer_implemented.step()
     distill_optimizer_implemented.zero_grad()

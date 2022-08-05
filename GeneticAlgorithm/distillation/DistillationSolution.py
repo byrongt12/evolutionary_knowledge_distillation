@@ -12,7 +12,7 @@ import torch
 from os import path
 
 from GeneticAlgorithm.Solution import Solution
-from NeuralNetwork.Train import train_model_with_distillation_only
+from NeuralNetwork.Train import train_model_with_distillation_only, evaluate
 
 
 class DistillationSolution(Solution):
@@ -71,6 +71,7 @@ class DistillationSolution(Solution):
         print(temp)
 
         student_model = trainingItems[4]
+        test_dl = trainingItems[3]
 
         student_chk_path = "../../../NeuralNetwork/resnet20.ckpt"
         if path.exists(student_chk_path):
@@ -79,17 +80,27 @@ class DistillationSolution(Solution):
             print("Path for student model weights does not exist.")
             exit()
 
-        self.fitness = train_model_with_distillation_only(heuristicString=self.heuristic_combination,
-                                                          heuristicToLayerDict=trainingItems[0],
-                                                          train_dl=trainingItems[2],
-                                                          test_dl=trainingItems[3],
-                                                          student_model=trainingItems[4],
-                                                          student_model_number=trainingItems[5],
-                                                          teacher_model=trainingItems[6],
-                                                          teacher_model_number=trainingItems[7],
-                                                          device=trainingItems[8],
-                                                          kd_loss_type=trainingItems[13],
-                                                          distill_optimizer=trainingItems[14],
-                                                          distill_lr=trainingItems[15])
+        torch.cuda.empty_cache()
 
+        result_before_distill = evaluate(student_model, test_dl)
+
+        train_model_with_distillation_only(3, heuristicString=self.heuristic_combination,
+                                           heuristicToLayerDict=trainingItems[0],
+                                           train_dl=trainingItems[2],
+                                           test_dl=trainingItems[3],
+                                           student_model=trainingItems[4],
+                                           student_model_number=trainingItems[5],
+                                           teacher_model=trainingItems[6],
+                                           teacher_model_number=trainingItems[7],
+                                           device=trainingItems[8],
+                                           kd_loss_type=trainingItems[13],
+                                           distill_optimizer=trainingItems[14],
+                                           distill_lr=trainingItems[15])
+
+        result_after_distill = evaluate(student_model, test_dl)
+
+        acc_change = result_after_distill['val_acc'] - result_before_distill['val_acc']
+        fitness = acc_change
+
+        self.fitness = fitness
         print(self.fitness)

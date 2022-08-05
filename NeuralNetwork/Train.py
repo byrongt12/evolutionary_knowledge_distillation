@@ -34,6 +34,9 @@ def get_lr(optimizer):
 
 def train_student(student_model, numOfEpochs, train_dl, test_dl, optimizer, max_lr, weight_decay, scheduler,
                   grad_clip=None):
+    if numOfEpochs == 0:
+        return student_model
+
     torch.cuda.empty_cache()
     history = []
 
@@ -180,7 +183,7 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
 
         result_after_distill = evaluate(student_model, test_dl)
 
-        fitness = result_after_distill['val_acc'] - result_before_distill['val_acc']
+        fitness = result_after_distill['train_acc'] - result_before_distill['train_acc']
 
         if not normalTrain:
             return fitness
@@ -196,21 +199,22 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
     return history
 
 
-def train_model_with_distillation_only(heuristicString, heuristicToLayerDict, train_dl, test_dl,
+def train_model_with_distillation_only(numberOfEpochs, heuristicString, heuristicToLayerDict, train_dl, test_dl,
                                        student_model, student_model_number, teacher_model,
                                        teacher_model_number, device, kd_loss_type, distill_optimizer,
                                        distill_lr):
-    torch.cuda.empty_cache()
 
-    result_before_distill = evaluate(student_model, test_dl)
+    count = 0
+    for batch in train_dl:
 
-    distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr,
-            next(iter(train_dl)),  # HERE change to use with random batch
-            student_model,
-            student_model_number, teacher_model, teacher_model_number, device)
+        count += 1
 
-    result_after_distill = evaluate(student_model, test_dl)
+        distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr,
+                batch,  # HERE change to use with random batch
+                student_model,
+                student_model_number, teacher_model, teacher_model_number, device)
 
-    fitness = result_after_distill['val_acc'] - result_before_distill['val_acc']
+        if count >= numberOfEpochs:
+            break
 
-    return fitness
+
