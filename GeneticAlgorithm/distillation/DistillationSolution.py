@@ -100,7 +100,11 @@ class DistillationSolution(Solution):
         result_after_distill = evaluate(student_model, test_dl)
 
         acc_change = result_after_distill['val_acc'] - result_before_distill['val_acc']
-        fitness = acc_change
+        loss_change = result_after_distill['val_loss'] - result_before_distill['val_loss']
+
+        fitness = loss_change - acc_change
+
+        print(acc_change)
 
         self.fitness = fitness
-        print(self.fitness)
+

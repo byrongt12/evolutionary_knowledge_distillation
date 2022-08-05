@@ -301,7 +301,6 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimiz
 
             kd_loss_arr.append(distill_loss)
 
-    total_loss = sum(kd_loss_arr)
-    total_loss.backward()
-    distill_optimizer_implemented.step()
-    distill_optimizer_implemented.zero_grad()
+            distill_loss.backward()
+            distill_optimizer_implemented.step()
+            distill_optimizer_implemented.zero_grad()
