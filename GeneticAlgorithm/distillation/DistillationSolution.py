@@ -80,7 +80,7 @@ class DistillationSolution(Solution):
             exit()
 
         self.fitness = train_model_with_distillation_only(heuristicString=self.heuristic_combination,
-                                                          heuristicToStudentDict=trainingItems[0],
+                                                          heuristicToLayerDict=trainingItems[0],
                                                           train_dl=trainingItems[2],
                                                           test_dl=trainingItems[3],
                                                           student_model=trainingItems[4],

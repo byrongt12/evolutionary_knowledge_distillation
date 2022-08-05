@@ -125,7 +125,7 @@ def train_model(epochs, train_dl, test_dl, model, optimizer, max_lr, weight_deca
     return history
 
 
-def train_model_with_distillation(heuristicString, heuristicToStudentDict, epochs, train_dl, test_dl, student_model,
+def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs, train_dl, test_dl, student_model,
                                   student_model_number, teacher_model,
                                   teacher_model_number, device, optimizer, max_lr,
                                   weight_decay, scheduler, kd_loss_type, distill_optimizer,
@@ -173,8 +173,8 @@ def train_model_with_distillation(heuristicString, heuristicToStudentDict, epoch
         # For each epoch, step through GA string.
         # abcdefghijklmnopqr = to find student feature map.
         # Use random to get corresponding teacher block(1-18) and conv (1-2)
-        distill(heuristicString, heuristicToStudentDict, kd_loss_type, distill_optimizer, distill_lr,
-                next(iter(train_dl))[0][0],
+        distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr,
+                next(iter(train_dl)),  # HERE
                 student_model,
                 student_model_number, teacher_model, teacher_model_number, device)
 
@@ -196,7 +196,7 @@ def train_model_with_distillation(heuristicString, heuristicToStudentDict, epoch
     return history
 
 
-def train_model_with_distillation_only(heuristicString, heuristicToStudentDict, train_dl, test_dl,
+def train_model_with_distillation_only(heuristicString, heuristicToLayerDict, train_dl, test_dl,
                                        student_model, student_model_number, teacher_model,
                                        teacher_model_number, device, kd_loss_type, distill_optimizer,
                                        distill_lr):
@@ -204,8 +204,8 @@ def train_model_with_distillation_only(heuristicString, heuristicToStudentDict, 
 
     result_before_distill = evaluate(student_model, test_dl)
 
-    distill(heuristicString, heuristicToStudentDict, kd_loss_type, distill_optimizer, distill_lr,
-            next(iter(train_dl))[0][0],  # HERE change to use with random batch
+    distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr,
+            next(iter(train_dl)),  # HERE change to use with random batch
             student_model,
             student_model_number, teacher_model, teacher_model_number, device)
 

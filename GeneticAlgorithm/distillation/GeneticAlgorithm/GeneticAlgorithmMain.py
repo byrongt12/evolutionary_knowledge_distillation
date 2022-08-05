@@ -24,7 +24,7 @@ class GeneticAlgorithmMain(object):
         # the GeneticAlgorithm library can be used to solve a combinatorial optimization problem.
         problem = DistillationProblem()
         seed = round(time.time() * 1000)
-        heuristics = "abcdefghijklmnopqr"
+        heuristics = "abcdefghijklmnopqrstuvwxyz1234567890"
         genetic_algorithm = GeneticAlgorithm(seed, heuristics)
         genetic_algorithm.set_parameters("Parameters.txt")
         genetic_algorithm.set_problem(problem)
@@ -39,14 +39,14 @@ class GeneticAlgorithmMain(object):
         max_lr = 0.01
 
         distill_optimizer = torch.optim.SGD
-        distill_lr = 0.7
+        distill_lr = 0.005
 
         grad_clip = 0
         weight_decay = 0
         scheduler = torch.optim.lr_scheduler.OneCycleLR
-        kd_loss_type = 'cosine'
+        kd_loss_type = 'ssim'
 
-        heuristicToStudentDict = {
+        heuristicToLayerDict = {
             'a': 1,
             'b': 2,
             'c': 3,
@@ -65,8 +65,39 @@ class GeneticAlgorithmMain(object):
             'p': 16,
             'q': 17,
             'r': 18,
+            's': 19,
+            't': 20,
+            'u': 21,
+            'v': 22,
+            'w': 23,
+            'x': 24,
+            'y': 25,
+            'z': 26,
+            '1': 27,
+            '2': 28,
+            '3': 29,
+            '4': 30,
+            '5': 31,
+            '6': 32,
+            '7': 33,
+            '8': 34,
+            '9': 35,
+            '0': 36,
         }
-        trainingParameters = [teacher_model_number, student_model_number, BATCH_SIZE, epochs, optimizer, max_lr, distill_optimizer, distill_lr, grad_clip, weight_decay, scheduler, kd_loss_type, heuristicToStudentDict]
+
+        print("Hyper parameters:")
+        print("Number of epochs: " + str(epochs))
+        print("Batch size: " + str(BATCH_SIZE))
+        print("Optimizer: " + str(optimizer))
+        print("Max learning rate: " + str(max_lr))
+        print("Gradient clip value: " + str(grad_clip))
+        print("Weight decay: " + str(weight_decay))
+        print("Scheduler: " + str(scheduler))
+        print("KD loss type: " + str(kd_loss_type))
+        print("Distill  optimizer : " + str(distill_optimizer))
+        print("Distill  optimizer learning rate: " + str(distill_lr))
+
+        trainingParameters = [teacher_model_number, student_model_number, BATCH_SIZE, epochs, optimizer, max_lr, distill_optimizer, distill_lr, grad_clip, weight_decay, scheduler, kd_loss_type, heuristicToLayerDict]
         solution = genetic_algorithm.evolve(trainingParameters)
         print("Best Solution")
         print("--------------")

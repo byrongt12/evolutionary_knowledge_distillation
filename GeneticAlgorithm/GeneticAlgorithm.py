@@ -30,6 +30,7 @@ from NeuralNetwork.ResidualBlock import ResidualBlock
 from NeuralNetwork.Train import train_model, evaluate, train_model_with_distillation
 from NeuralNetwork.Print import plot_acc, plot_loss
 
+
 class GeneticAlgorithm(object):
     # Data elements
     # 
@@ -536,7 +537,7 @@ class GeneticAlgorithm(object):
         weight_decay = trainingParameters[9]
         scheduler = trainingParameters[10]
         kd_loss_type = trainingParameters[11]
-        heuristicToStudentDict = trainingParameters[12]
+        heuristicToLayerDict = trainingParameters[12]
 
         # Save old student weights to a file:
         torch.save(student_model.state_dict(), "../../../NeuralNetwork/resnet20_initialized.ckpt")
@@ -545,7 +546,8 @@ class GeneticAlgorithm(object):
         student_model = train_student(student_model, 1, train_dl, test_dl, optimizer, max_lr, weight_decay, scheduler,
                                       grad_clip)
 
-        trainingItems = [heuristicToStudentDict, epochs, train_dl, test_dl, student_model, student_model_number,
+        trainingItems = [heuristicToLayerDict, epochs, train_dl, test_dl, student_model,
+                         student_model_number,
                          teacher_model, teacher_model_number, device, optimizer, max_lr, weight_decay, scheduler,
                          kd_loss_type, distill_optimizer, distill_lr, grad_clip]
 
@@ -581,11 +583,12 @@ class GeneticAlgorithm(object):
             exit()
 
         history = [evaluate(student_model, test_dl)]
-        history += train_model_with_distillation(best.get_heuristic_combination(), heuristicToStudentDict, epochs, train_dl,
-                                      test_dl, student_model, student_model_number, teacher_model, teacher_model_number,
-                                      device, optimizer, max_lr,
-                                      weight_decay, scheduler, kd_loss_type, distill_optimizer,
-                                      distill_lr, grad_clip, normalTrain=True)
+        history += train_model_with_distillation(best.get_heuristic_combination(), heuristicToLayerDict, epochs, train_dl,
+                                                 test_dl, student_model, student_model_number, teacher_model,
+                                                 teacher_model_number,
+                                                 device, optimizer, max_lr,
+                                                 weight_decay, scheduler, kd_loss_type, distill_optimizer,
+                                                 distill_lr, grad_clip, normalTrain=True)
         plot_acc(history)
         plot_loss(history)
 

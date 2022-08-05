@@ -226,40 +226,38 @@ def creatParametersList(student_model, layerForStudent, blockForStudent, convFor
     return params
 
 
-def distill(heuristicString, heuristicToStudentDict, kd_loss_type, distill_optimizer, distill_lr, batch_item, student_model,
+def distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr, batch,
+            student_model,
             student_model_number, teacher_model, teacher_model_number, device):
-
     # Step through GA string.
     # abcdefghijklmnopqr = represents student feature map.
     # Use random to get corresponding teacher block(1-18) and conv (1-2).
     # Compute loss from mappings between teacher and student feature map.
     # Add add loss values from all feature map comparisons and then calculate gradients and update weights.
 
-
     student_model.train()  # put the model in train mode
 
     kd_loss_arr = []
     featureMapNumForStudentArr = []
+    featureMapNumForTeacherArr = []
     distill_optimizer_implemented = distill_optimizer(student_model.parameters(), lr=distill_lr)
 
     for i in range(0, len(heuristicString)):
-        featureMapNumForStudentArr.append(heuristicToStudentDict[heuristicString[i]])
+        if (i + 1) % 2 != 0:
+            # student layer
+            student_layer_number = heuristicToLayerDict[heuristicString[i]] % student_model_number
+            if student_layer_number == 0:
+                student_layer_number = student_model_number
+            featureMapNumForStudentArr.append(student_layer_number)
+        else:
+            # teacher layer
+            featureMapNumForTeacherArr.append(heuristicToLayerDict[heuristicString[i]])
 
-    for i in range(0, len(featureMapNumForStudentArr)):
-
-        featureMapNumForStudent = featureMapNumForStudentArr[i]
-
-        # Get optimizer set up for the student model.
-        layerForStudent, blockForStudent, convForStudent = convertLayerToCode(student_model_number, featureMapNumForStudent)
-
-        if layerForStudent is None or blockForStudent is None or convForStudent is None:
-            print("Layer or block or conv is Null")
-            exit()
-
-        # get feature map for teacher.
-        # HERE need to change teacher map selection! and check loss function
-
-        random.seed(i)
+    if len(heuristicString) % 2 != 0:
+        # featureMapNumForStudentArr > featureMapNumForTeacherArr, so add random teacher layer
+        layerForStudent, blockForStudent, convForStudent = convertLayerToCode(student_model_number,
+                                                                              featureMapNumForStudentArr[-1])
+        random.seed(len(featureMapNumForStudentArr))
         layerForTeacher = layerForStudent
         blockForTeacher = random.randint(1, teacher_model_number)
         convForTeacher = random.randint(1, 2)
@@ -267,32 +265,43 @@ def distill(heuristicString, heuristicToStudentDict, kd_loss_type, distill_optim
         featureMapNumForTeacher = ((layerForTeacher - 1) * (teacher_model_number * 2)) + (
                 (blockForTeacher - 1) * 2) + convForTeacher
 
-        image = batch_item
+        featureMapNumForTeacherArr.append(featureMapNumForTeacher)
 
-        featureMapForTeacher = getFeatureMaps(teacher_model, device, image)[featureMapNumForTeacher]
-        featureMapForStudent = getFeatureMaps(student_model, device, image)[featureMapNumForStudent]
+    for i in range(0, (len(featureMapNumForStudentArr))):
+        featureMapNumForStudent = featureMapNumForStudentArr[i]
+        featureMapNumForTeacher = featureMapNumForTeacherArr[i]
 
-        # Normalize tensor so NaN values do not get produced by loss function
-        t = normalize(featureMapForTeacher, p=1.0, dim=2)
-        t = normalize(t, p=1.0, dim=3)
-        s = normalize(featureMapForStudent, p=1.0, dim=2)
-        s = normalize(s, p=1.0, dim=3)
+        images, labels = batch
 
-        # Loss functions: Cosine, SSIM, PSNR and Euclidean dist
-        distill_loss = 0
-        if kd_loss_type == 'ssim':
-            distill_loss = ssim_loss(s, t, max_val=1.0, window_size=1)
-        elif kd_loss_type == 'psnr':
-            distill_loss = psnr_loss(s, t, max_val=1.0)
-        elif kd_loss_type == 'cosine':
-            distill_loss = F.cosine_similarity(t.reshape(1, -1), s.reshape(1, -1))
-        elif kd_loss_type == 'euclidean':
-            distill_loss = pairwise_euclidean_distance(t.reshape(1, -1), s.reshape(1, -1))
+        for image in images:
 
-        kd_loss_arr.append(distill_loss)
+            featureMapForTeacher = getFeatureMaps(teacher_model, device, image)[featureMapNumForTeacher]
+            featureMapForStudent = getFeatureMaps(student_model, device, image)[featureMapNumForStudent]
 
-    total_loss = sum(kd_loss_arr)
-    total_loss.backward()
+            # Normalize tensor so NaN values do not get produced by loss function
+            t = normalize(featureMapForTeacher, p=1.0, dim=2)
+            t = normalize(t, p=1.0, dim=3)
+            s = normalize(featureMapForStudent, p=1.0, dim=2)
+            s = normalize(s, p=1.0, dim=3)
+
+            # Loss functions: Cosine, SSIM, PSNR and Euclidean dist
+            distill_loss = 0
+            if kd_loss_type == 'ssim':
+                distill_loss = 1 - ssim_loss(s, t, max_val=1.0, window_size=1)
+            elif kd_loss_type == 'psnr':
+                distill_loss = 1 - psnr_loss(s, t, max_val=1.0)
+            elif kd_loss_type == 'cosine':
+                distill_loss = F.cosine_similarity(t.reshape(1, -1), s.reshape(1, -1))
+            elif kd_loss_type == 'euclidean':
+                distill_loss = pairwise_euclidean_distance(t.reshape(1, -1), s.reshape(1, -1))
+
+            kd_loss_arr.append(distill_loss)
+
+        total_loss = sum(kd_loss_arr)
+        if i == len(featureMapNumForStudentArr) - 1:
+            total_loss.backward()
+        else:
+            total_loss.backward(retain_graph=True)
+
     distill_optimizer_implemented.step()
     distill_optimizer_implemented.zero_grad()
-
