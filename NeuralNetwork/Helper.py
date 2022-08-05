@@ -1,5 +1,3 @@
-import random
-
 import torch  # need this for eval function
 import torch.nn as nn
 import torch.nn.functional as F
@@ -229,11 +227,6 @@ def creatParametersList(student_model, layerForStudent, blockForStudent, convFor
 def distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr, batch,
             student_model,
             student_model_number, teacher_model, teacher_model_number, device):
-    # Step through GA string.
-    # abcdefghijklmnopqr = represents student feature map.
-    # Use random to get corresponding teacher block(1-18) and conv (1-2).
-    # Compute loss from mappings between teacher and student feature map.
-    # Add add loss values from all feature map comparisons and then calculate gradients and update weights.
 
     student_model.train()  # put the model in train mode
 
@@ -261,7 +254,7 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimiz
             featureMapNumForTeacherArr.append(teacher_layer_number)
 
     if len(heuristicString) % 2 != 0:
-        # featureMapNumForStudentArr > featureMapNumForTeacherArr, so add random teacher layer
+        # featureMapNumForStudentArr > featureMapNumForTeacherArr, so add teacher layer
         layerForStudent, blockForStudent, convForStudent = convertLayerToCode(student_model_number,
                                                                               featureMapNumForStudentArr[-1])
 
