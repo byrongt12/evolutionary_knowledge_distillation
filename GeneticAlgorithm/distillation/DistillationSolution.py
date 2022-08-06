@@ -12,7 +12,7 @@ import torch
 from os import path
 
 from GeneticAlgorithm.Solution import Solution
-from NeuralNetwork.Train import train_model_with_distillation_only, evaluate
+from NeuralNetwork.Train import train_model_with_distillation_only, evaluate, train_model_with_normal_and_distill
 
 
 class DistillationSolution(Solution):
@@ -70,8 +70,23 @@ class DistillationSolution(Solution):
         self.initial_solution = temp
         print(temp)
 
-        student_model = trainingItems[4]
+        heuristicToLayerDict = trainingItems[0]
+        epochs = trainingItems[1]
+        train_dl = trainingItems[2]
         test_dl = trainingItems[3]
+        student_model = trainingItems[4]
+        student_model_number = trainingItems[5]
+        teacher_model = trainingItems[6]
+        teacher_model_number = trainingItems[7]
+        device = trainingItems[8]
+        optimizer = trainingItems[9]
+        max_lr = trainingItems[10]
+        weight_decay = trainingItems[11]
+        scheduler = trainingItems[12]
+        kd_loss_type = trainingItems[13]
+        distill_optimizer = trainingItems[14]
+        distill_lr = trainingItems[15]
+        grad_clip = trainingItems[16]
 
         student_chk_path = "../../../NeuralNetwork/resnet20.ckpt"
         if path.exists(student_chk_path):
@@ -84,7 +99,7 @@ class DistillationSolution(Solution):
 
         result_before_distill = evaluate(student_model, test_dl)
 
-        train_model_with_distillation_only(3, heuristicString=self.heuristic_combination,
+        '''train_model_with_distillation_only(1, heuristicString=self.heuristic_combination,
                                            heuristicToLayerDict=trainingItems[0],
                                            train_dl=trainingItems[2],
                                            test_dl=trainingItems[3],
@@ -95,7 +110,15 @@ class DistillationSolution(Solution):
                                            device=trainingItems[8],
                                            kd_loss_type=trainingItems[13],
                                            distill_optimizer=trainingItems[14],
-                                           distill_lr=trainingItems[15])
+                                           distill_lr=trainingItems[15])'''
+
+        train_model_with_normal_and_distill(self.heuristic_combination, heuristicToLayerDict, epochs, train_dl, test_dl,
+                                            student_model,
+                                            student_model_number, teacher_model,
+                                            teacher_model_number, device, optimizer, max_lr,
+                                            weight_decay, scheduler, kd_loss_type, distill_optimizer,
+                                            distill_lr,
+                                            grad_clip=None, normalTrain=False, numOfDistillIter=1)
 
         result_after_distill = evaluate(student_model, test_dl)
 
@@ -107,4 +130,3 @@ class DistillationSolution(Solution):
         print(acc_change)
 
         self.fitness = fitness
-

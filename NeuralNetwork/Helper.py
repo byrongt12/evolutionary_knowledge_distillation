@@ -226,7 +226,7 @@ def creatParametersList(student_model, layerForStudent, blockForStudent, convFor
 
 def distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr, batch,
             student_model,
-            student_model_number, teacher_model, teacher_model_number, device):
+            student_model_number, teacher_model, teacher_model_number, device, lossOnly=False):
 
     student_model.train()  # put the model in train mode
 
@@ -294,6 +294,9 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimiz
 
             kd_loss_arr.append(distill_loss)
 
-            distill_loss.backward()
-            distill_optimizer_implemented.step()
-            distill_optimizer_implemented.zero_grad()
+            if not lossOnly:
+                distill_loss.backward()
+                distill_optimizer_implemented.step()
+                distill_optimizer_implemented.zero_grad()
+
+    return kd_loss_arr
