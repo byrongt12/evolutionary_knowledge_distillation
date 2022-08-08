@@ -12,7 +12,8 @@ import torch
 from os import path
 
 from GeneticAlgorithm.Solution import Solution
-from NeuralNetwork.Train import train_model_distill_only, evaluate, train_model_normal_and_distill
+from NeuralNetwork.Train import train_model_distill_only, evaluate, train_model_normal_and_distill, \
+    get_model_distill_loss_only
 
 
 class DistillationSolution(Solution):
@@ -97,21 +98,21 @@ class DistillationSolution(Solution):
 
         # torch.cuda.empty_cache()
 
-        result_before_distill = evaluate(student_model, test_dl)
+        '''result_before_distill = evaluate(student_model, test_dl)'''
 
-        train_model_distill_only(1,
-                                 self.heuristic_combination,
-                                 heuristicToLayerDict,
-                                 train_dl,
-                                 test_dl,
-                                 student_model,
-                                 student_model_number,
-                                 teacher_model,
-                                 teacher_model_number,
-                                 device,
-                                 kd_loss_type,
-                                 distill_optimizer,
-                                 distill_lr)
+        lossArr = get_model_distill_loss_only(2,
+                                              self.heuristic_combination,
+                                              heuristicToLayerDict,
+                                              train_dl,
+                                              test_dl,
+                                              student_model,
+                                              student_model_number,
+                                              teacher_model,
+                                              teacher_model_number,
+                                              device,
+                                              kd_loss_type,
+                                              distill_optimizer,
+                                              distill_lr)
 
         '''train_model_normal_and_distill(self.heuristic_combination, heuristicToLayerDict, 1, train_dl, test_dl,
                                        student_model,
@@ -121,13 +122,13 @@ class DistillationSolution(Solution):
                                        distill_lr,
                                        grad_clip=None)'''
 
-        result_after_distill = evaluate(student_model, test_dl)
+        '''result_after_distill = evaluate(student_model, test_dl)
 
         acc_change = result_after_distill['val_acc'] - result_before_distill['val_acc']
-        loss_change = result_after_distill['val_loss'] - result_before_distill['val_loss']
+        loss_change = result_after_distill['val_loss'] - result_before_distill['val_loss']'''
 
-        fitness = acc_change
+        fitness = abs(sum(lossArr).data)
 
-        print(acc_change)
+        print(fitness)
 
         self.fitness = fitness
