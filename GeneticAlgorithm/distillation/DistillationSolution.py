@@ -12,7 +12,7 @@ import torch
 from os import path
 
 from GeneticAlgorithm.Solution import Solution
-from NeuralNetwork.Train import train_model_with_distillation_only, evaluate, train_model_with_normal_and_distill
+from NeuralNetwork.Train import train_model_distill_only, evaluate, train_model_normal_and_distill
 
 
 class DistillationSolution(Solution):
@@ -88,9 +88,9 @@ class DistillationSolution(Solution):
         distill_lr = trainingItems[15]
         grad_clip = trainingItems[16]
 
-        student_chk_path = "../../../NeuralNetwork/resnet20.ckpt"
+        student_chk_path = "../../../NeuralNetwork/resnet20_initialized.ckpt"
         if path.exists(student_chk_path):
-            student_model.load_state_dict(torch.load("../../../NeuralNetwork/resnet20.ckpt"))
+            student_model.load_state_dict(torch.load(student_chk_path))
         else:
             print("Path for student model weights does not exist.")
             exit()
@@ -99,26 +99,26 @@ class DistillationSolution(Solution):
 
         result_before_distill = evaluate(student_model, test_dl)
 
-        '''train_model_with_distillation_only(1, heuristicString=self.heuristic_combination,
-                                           heuristicToLayerDict=trainingItems[0],
-                                           train_dl=trainingItems[2],
-                                           test_dl=trainingItems[3],
-                                           student_model=trainingItems[4],
-                                           student_model_number=trainingItems[5],
-                                           teacher_model=trainingItems[6],
-                                           teacher_model_number=trainingItems[7],
-                                           device=trainingItems[8],
-                                           kd_loss_type=trainingItems[13],
-                                           distill_optimizer=trainingItems[14],
-                                           distill_lr=trainingItems[15])'''
+        train_model_distill_only(1, heuristicString=self.heuristic_combination,
+                                      heuristicToLayerDict=trainingItems[0],
+                                      train_dl=trainingItems[2],
+                                      test_dl=trainingItems[3],
+                                      student_model=trainingItems[4],
+                                      student_model_number=trainingItems[5],
+                                      teacher_model=trainingItems[6],
+                                      teacher_model_number=trainingItems[7],
+                                      device=trainingItems[8],
+                                      kd_loss_type=trainingItems[13],
+                                      distill_optimizer=trainingItems[14],
+                                      distill_lr=trainingItems[15])
 
-        train_model_with_normal_and_distill(self.heuristic_combination, heuristicToLayerDict, epochs, train_dl, test_dl,
-                                            student_model,
-                                            student_model_number, teacher_model,
-                                            teacher_model_number, device, optimizer, max_lr,
-                                            weight_decay, scheduler, kd_loss_type, distill_optimizer,
-                                            distill_lr,
-                                            grad_clip=None, normalTrain=False, numOfDistillIter=1)
+        '''train_model_normal_and_distill(self.heuristic_combination, heuristicToLayerDict, 1, train_dl, test_dl,
+                                       student_model,
+                                       student_model_number, teacher_model,
+                                       teacher_model_number, device, optimizer, max_lr,
+                                       weight_decay, scheduler, kd_loss_type, distill_optimizer,
+                                       distill_lr,
+                                       grad_clip=None)'''
 
         result_after_distill = evaluate(student_model, test_dl)
 

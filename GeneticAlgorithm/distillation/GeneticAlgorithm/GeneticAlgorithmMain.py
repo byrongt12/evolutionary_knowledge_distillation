@@ -22,6 +22,7 @@ class GeneticAlgorithmMain(object):
     def solve(cls):
         # This method illustrates how the selection construction hyper-heuristic in
         # the GeneticAlgorithm library can be used to solve a combinatorial optimization problem.
+        # abcdefghijklmnopqrstuvwxyz1234567890
         problem = DistillationProblem()
         seed = round(time.time() * 1000)
         heuristics = "abcdefghijklmnopqrstuvwxyz1234567890"

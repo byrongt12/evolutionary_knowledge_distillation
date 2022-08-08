@@ -227,7 +227,6 @@ def creatParametersList(student_model, layerForStudent, blockForStudent, convFor
 def distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr, batch,
             student_model,
             student_model_number, teacher_model, teacher_model_number, device, lossOnly=False):
-
     student_model.train()  # put the model in train mode
 
     kd_loss_arr = []
@@ -265,6 +264,7 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimiz
         featureMapNumForTeacherArr.append(teacher_layer_number)
 
     for i in range(0, (len(featureMapNumForStudentArr))):
+
         featureMapNumForStudent = featureMapNumForStudentArr[i]
         featureMapNumForTeacher = featureMapNumForTeacherArr[i]
 

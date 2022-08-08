@@ -133,7 +133,7 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
                                   teacher_model_number, device, optimizer, max_lr,
                                   weight_decay, scheduler, kd_loss_type, distill_optimizer,
                                   distill_lr,
-                                  grad_clip=None, normalTrain=False):
+                                  grad_clip=None):
     torch.cuda.empty_cache()
     history = []
 
@@ -170,23 +170,10 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
             scheduler.step()
             lrs.append(get_lr(optimizer))
 
-        # calculate validation before distillation loss
-        result_before_distill = evaluate(student_model, test_dl)
-        # Distillation
-        # For each epoch, step through GA string.
-        # abcdefghijklmnopqr = to find student feature map.
-        # Use random to get corresponding teacher block(1-18) and conv (1-2)
         distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr,
-                next(iter(train_dl)),  # HERE
+                next(iter(train_dl)),
                 student_model,
                 student_model_number, teacher_model, teacher_model_number, device)
-
-        result_after_distill = evaluate(student_model, test_dl)
-
-        fitness = result_after_distill['train_acc'] - result_before_distill['train_acc']
-
-        if not normalTrain:
-            return fitness
 
         # Add results:
         result = evaluate(student_model, test_dl)
@@ -199,10 +186,10 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
     return history
 
 
-def train_model_with_distillation_only(numberOfEpochs, heuristicString, heuristicToLayerDict, train_dl, test_dl,
-                                       student_model, student_model_number, teacher_model,
-                                       teacher_model_number, device, kd_loss_type, distill_optimizer,
-                                       distill_lr):
+def train_model_distill_only(numberOfEpochs, heuristicString, heuristicToLayerDict, train_dl, test_dl,
+                             student_model, student_model_number, teacher_model,
+                             teacher_model_number, device, kd_loss_type, distill_optimizer,
+                             distill_lr):
     count = 0
     for batch in train_dl:
 
@@ -217,66 +204,41 @@ def train_model_with_distillation_only(numberOfEpochs, heuristicString, heuristi
             break
 
 
-def train_model_with_normal_and_distill(heuristicString, heuristicToLayerDict, epochs, train_dl, test_dl, student_model,
-                                        student_model_number, teacher_model,
-                                        teacher_model_number, device, optimizer, max_lr,
-                                        weight_decay, scheduler, kd_loss_type, distill_optimizer,
-                                        distill_lr,
-                                        grad_clip=None, normalTrain=False, numOfDistillIter=1):
-    # Create function that trains 1 (parameter) normal epoch and then distillation and then combines loss functions (normalized)
+def train_model_normal_and_distill(heuristicString, heuristicToLayerDict, epochs, train_dl, test_dl, student_model,
+                                   student_model_number, teacher_model,
+                                   teacher_model_number, device, optimizer, max_lr,
+                                   weight_decay, scheduler, kd_loss_type, distill_optimizer,
+                                   distill_lr,
+                                   grad_clip=None):
 
     torch.cuda.empty_cache()
-    history = []
 
     optimizer = optimizer(student_model.parameters(), max_lr, weight_decay=weight_decay)
     scheduler = scheduler(optimizer, max_lr, epochs=epochs, steps_per_epoch=len(train_dl))
 
     for epoch in range(epochs):
         student_model.train()  # put the model in train mode
-        train_loss = []
-        kd_loss_arr = []
-        train_acc = []
         lrs = []
-        batch_count = 0
+
+        # Normal error and update
 
         for batch in train_dl:
-            batch_count += 1
-            # print(batch_count)
-
-            # Normal error and update
             loss, acc = student_model.training_step(batch)
-            train_loss.append(loss)
-            train_acc.append(acc)
+            loss.backward()
 
-            #HERE not backwarding the loss? so memory error?
-
-        count = 0
-        for batch in train_dl:
-
-            count += 1
-
-            kd_loss_arr = distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr,
-                                  batch,  # HERE change to use with random batch
-                                  student_model,
-                                  student_model_number, teacher_model, teacher_model_number, device, True)
-
-            if count >= numOfDistillIter:
-                break
-
-        if not normalTrain:
-            total_loss = sum([train_loss, kd_loss_arr])
-            total_loss.backward()
             if grad_clip:
                 nn.utils.clip_grad_value_(student_model.parameters(), grad_clip)
+
+            optimizer.step()
+            for param in student_model.parameters():  # instead of: optimizer.zero_grad()
+                param.grad = None
+
+            # Step scheduler
             scheduler.step()
             lrs.append(get_lr(optimizer))
 
-        # Add results:
-        result = evaluate(student_model, test_dl)
-        result["train_loss"] = torch.stack(train_loss).mean().item()
-        result["train_acc"] = torch.stack(train_acc).mean().item()
-        result["lrs"] = lrs
-        student_model.epoch_end(epoch, result)
-        history.append(result)
+        distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr,
+                next(iter(train_dl)),
+                student_model,
+                student_model_number, teacher_model, teacher_model_number, device, False)
 
-    return history
