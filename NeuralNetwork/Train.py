@@ -205,6 +205,27 @@ def train_model_distill_only(numberOfEpochs, heuristicString, heuristicToLayerDi
             break
 
 
+def get_model_distill_loss_only(numberOfEpochs, heuristicString, heuristicToLayerDict, train_dl, test_dl,
+                                student_model, student_model_number, teacher_model,
+                                teacher_model_number, device, kd_loss_type, distill_optimizer,
+                                distill_lr):
+    count = 0
+    lossArr = []
+    for batch in train_dl:
+
+        count += 1
+
+        lossArr += distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr,
+                           batch,
+                           student_model,
+                           student_model_number, teacher_model, teacher_model_number, device, lossOnly=True)
+
+        if count >= numberOfEpochs:
+            break
+
+    return lossArr
+
+
 def train_model_normal_and_distill(heuristicString, heuristicToLayerDict, epochs, train_dl, test_dl, student_model,
                                    student_model_number, teacher_model,
                                    teacher_model_number, device, optimizer, max_lr,
