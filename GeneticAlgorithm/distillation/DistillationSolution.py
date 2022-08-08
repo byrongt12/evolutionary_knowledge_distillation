@@ -131,7 +131,7 @@ class DistillationSolution(Solution):
             newLoss = abs(loss)
             newLossArr.append(newLoss)
 
-        fitness = abs(sum(newLossArr).data)
+        fitness = sum(newLossArr).data
 
         print(fitness)
 
