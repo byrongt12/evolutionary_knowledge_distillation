@@ -95,22 +95,23 @@ class DistillationSolution(Solution):
             print("Path for student model weights does not exist.")
             exit()
 
-        torch.cuda.empty_cache()
+        # torch.cuda.empty_cache()
 
         result_before_distill = evaluate(student_model, test_dl)
 
-        train_model_distill_only(1, heuristicString=self.heuristic_combination,
-                                      heuristicToLayerDict=trainingItems[0],
-                                      train_dl=trainingItems[2],
-                                      test_dl=trainingItems[3],
-                                      student_model=trainingItems[4],
-                                      student_model_number=trainingItems[5],
-                                      teacher_model=trainingItems[6],
-                                      teacher_model_number=trainingItems[7],
-                                      device=trainingItems[8],
-                                      kd_loss_type=trainingItems[13],
-                                      distill_optimizer=trainingItems[14],
-                                      distill_lr=trainingItems[15])
+        train_model_distill_only(1,
+                                 self.heuristic_combination,
+                                 heuristicToLayerDict,
+                                 train_dl,
+                                 test_dl,
+                                 student_model,
+                                 student_model_number,
+                                 teacher_model,
+                                 teacher_model_number,
+                                 device,
+                                 kd_loss_type,
+                                 distill_optimizer,
+                                 distill_lr)
 
         '''train_model_normal_and_distill(self.heuristic_combination, heuristicToLayerDict, 1, train_dl, test_dl,
                                        student_model,
@@ -125,7 +126,7 @@ class DistillationSolution(Solution):
         acc_change = result_after_distill['val_acc'] - result_before_distill['val_acc']
         loss_change = result_after_distill['val_loss'] - result_before_distill['val_loss']
 
-        fitness = loss_change - acc_change
+        fitness = acc_change
 
         print(acc_change)
 

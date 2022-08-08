@@ -299,4 +299,6 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimiz
                 distill_optimizer_implemented.step()
                 distill_optimizer_implemented.zero_grad()
 
+            break
+
     return kd_loss_arr

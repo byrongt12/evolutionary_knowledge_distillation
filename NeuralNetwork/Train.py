@@ -191,6 +191,7 @@ def train_model_distill_only(numberOfEpochs, heuristicString, heuristicToLayerDi
                              teacher_model_number, device, kd_loss_type, distill_optimizer,
                              distill_lr):
     count = 0
+
     for batch in train_dl:
 
         count += 1
@@ -210,7 +211,6 @@ def train_model_normal_and_distill(heuristicString, heuristicToLayerDict, epochs
                                    weight_decay, scheduler, kd_loss_type, distill_optimizer,
                                    distill_lr,
                                    grad_clip=None):
-
     torch.cuda.empty_cache()
 
     optimizer = optimizer(student_model.parameters(), max_lr, weight_decay=weight_decay)
@@ -241,4 +241,3 @@ def train_model_normal_and_distill(heuristicString, heuristicToLayerDict, epochs
                 next(iter(train_dl)),
                 student_model,
                 student_model_number, teacher_model, teacher_model_number, device, False)
-
