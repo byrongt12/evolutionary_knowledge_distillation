@@ -189,6 +189,8 @@ def get_model_distill_loss_only(numOfBatches, heuristicString, heuristicToLayerD
                                 student_model, student_model_number, teacher_model,
                                 teacher_model_number, device, kd_loss_type, distill_optimizer,
                                 distill_lr):
+    # numOfBatches = 1 gives good results? (0.62 acc)
+
     count = 0
     lossArr = []
     for batch in train_dl:
@@ -248,10 +250,11 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
             scheduler.step()
             lrs.append(get_lr(optimizer))
 
+        # HERE
         distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr,
                 next(iter(train_dl)),
                 student_model,
-                student_model_number, teacher_model, teacher_model_number, device)
+                student_model_number, teacher_model, teacher_model_number, device, lossOnly=False)
 
         # Add results:
         result = evaluate(student_model, test_dl)
