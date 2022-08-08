@@ -128,6 +128,84 @@ def train_model(epochs, train_dl, test_dl, model, optimizer, max_lr, weight_deca
     return history
 
 
+def train_model_distill_only(numberOfEpochs, heuristicString, heuristicToLayerDict, train_dl, test_dl,
+                             student_model, student_model_number, teacher_model,
+                             teacher_model_number, device, kd_loss_type, distill_optimizer,
+                             distill_lr):
+    count = 0
+
+    for batch in train_dl:
+
+        count += 1
+
+        distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr,
+                batch,  # HERE change to use with random batch
+                student_model,
+                student_model_number, teacher_model, teacher_model_number, device)
+
+        if count >= numberOfEpochs:
+            break
+
+
+def train_model_normal_and_distill(heuristicString, heuristicToLayerDict, epochs, train_dl, test_dl, student_model,
+                                   student_model_number, teacher_model,
+                                   teacher_model_number, device, optimizer, max_lr,
+                                   weight_decay, scheduler, kd_loss_type, distill_optimizer,
+                                   distill_lr,
+                                   grad_clip=None):
+    torch.cuda.empty_cache()
+
+    optimizer = optimizer(student_model.parameters(), max_lr, weight_decay=weight_decay)
+    scheduler = scheduler(optimizer, max_lr, epochs=epochs, steps_per_epoch=len(train_dl))
+
+    for epoch in range(epochs):
+        student_model.train()  # put the model in train mode
+        lrs = []
+
+        # Normal error and update
+
+        for batch in train_dl:
+            loss, acc = student_model.training_step(batch)
+            loss.backward()
+
+            if grad_clip:
+                nn.utils.clip_grad_value_(student_model.parameters(), grad_clip)
+
+            optimizer.step()
+            for param in student_model.parameters():  # instead of: optimizer.zero_grad()
+                param.grad = None
+
+            # Step scheduler
+            scheduler.step()
+            lrs.append(get_lr(optimizer))
+
+        distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr,
+                next(iter(train_dl)),
+                student_model,
+                student_model_number, teacher_model, teacher_model_number, device, False)
+
+
+def get_model_distill_loss_only(numOfBatches, heuristicString, heuristicToLayerDict, train_dl, test_dl,
+                                student_model, student_model_number, teacher_model,
+                                teacher_model_number, device, kd_loss_type, distill_optimizer,
+                                distill_lr):
+    count = 0
+    lossArr = []
+    for batch in train_dl:
+
+        count += 1
+
+        lossArr += distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr,
+                           batch,
+                           student_model,
+                           student_model_number, teacher_model, teacher_model_number, device, lossOnly=True)
+
+        if count >= numOfBatches:
+            break
+
+    return lossArr
+
+
 def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs, train_dl, test_dl, student_model,
                                   student_model_number, teacher_model,
                                   teacher_model_number, device, optimizer, max_lr,
@@ -184,81 +262,3 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
         history.append(result)
 
     return history
-
-
-def train_model_distill_only(numberOfEpochs, heuristicString, heuristicToLayerDict, train_dl, test_dl,
-                             student_model, student_model_number, teacher_model,
-                             teacher_model_number, device, kd_loss_type, distill_optimizer,
-                             distill_lr):
-    count = 0
-
-    for batch in train_dl:
-
-        count += 1
-
-        distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr,
-                batch,  # HERE change to use with random batch
-                student_model,
-                student_model_number, teacher_model, teacher_model_number, device)
-
-        if count >= numberOfEpochs:
-            break
-
-
-def get_model_distill_loss_only(numberOfEpochs, heuristicString, heuristicToLayerDict, train_dl, test_dl,
-                                student_model, student_model_number, teacher_model,
-                                teacher_model_number, device, kd_loss_type, distill_optimizer,
-                                distill_lr):
-    count = 0
-    lossArr = []
-    for batch in train_dl:
-
-        count += 1
-
-        lossArr += distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr,
-                           batch,
-                           student_model,
-                           student_model_number, teacher_model, teacher_model_number, device, lossOnly=True)
-
-        if count >= numberOfEpochs:
-            break
-
-    return lossArr
-
-
-def train_model_normal_and_distill(heuristicString, heuristicToLayerDict, epochs, train_dl, test_dl, student_model,
-                                   student_model_number, teacher_model,
-                                   teacher_model_number, device, optimizer, max_lr,
-                                   weight_decay, scheduler, kd_loss_type, distill_optimizer,
-                                   distill_lr,
-                                   grad_clip=None):
-    torch.cuda.empty_cache()
-
-    optimizer = optimizer(student_model.parameters(), max_lr, weight_decay=weight_decay)
-    scheduler = scheduler(optimizer, max_lr, epochs=epochs, steps_per_epoch=len(train_dl))
-
-    for epoch in range(epochs):
-        student_model.train()  # put the model in train mode
-        lrs = []
-
-        # Normal error and update
-
-        for batch in train_dl:
-            loss, acc = student_model.training_step(batch)
-            loss.backward()
-
-            if grad_clip:
-                nn.utils.clip_grad_value_(student_model.parameters(), grad_clip)
-
-            optimizer.step()
-            for param in student_model.parameters():  # instead of: optimizer.zero_grad()
-                param.grad = None
-
-            # Step scheduler
-            scheduler.step()
-            lrs.append(get_lr(optimizer))
-
-        distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr,
-                next(iter(train_dl)),
-                student_model,
-                student_model_number, teacher_model, teacher_model_number, device, False)

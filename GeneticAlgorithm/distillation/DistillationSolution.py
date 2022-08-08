@@ -100,7 +100,7 @@ class DistillationSolution(Solution):
 
         '''result_before_distill = evaluate(student_model, test_dl)'''
 
-        lossArr = get_model_distill_loss_only(2,
+        lossArr = get_model_distill_loss_only(10,
                                               self.heuristic_combination,
                                               heuristicToLayerDict,
                                               train_dl,
