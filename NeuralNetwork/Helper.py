@@ -7,12 +7,6 @@ import torchvision.transforms as transforms
 from torchmetrics.functional import pairwise_euclidean_distance
 from torch.nn.functional import normalize
 
-# from pytorch_msssim import ms_ssim
-# from ignite.engine import Engine
-# from ignite.metrics import SSIM, PSNR
-import kornia.metrics as metrics
-
-
 def printLayerAndGradientBoolean(student_model):
     model_children = list(student_model.children())
     counter = 0
