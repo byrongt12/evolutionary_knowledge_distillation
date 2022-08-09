@@ -10,7 +10,6 @@
 #
 
 import time
-
 import torch
 
 from GeneticAlgorithm.GeneticAlgorithm import GeneticAlgorithm
@@ -98,7 +97,9 @@ class GeneticAlgorithmMain(object):
         print("Distill  optimizer : " + str(distill_optimizer))
         print("Distill  optimizer learning rate: " + str(distill_lr))
 
-        trainingParameters = [teacher_model_number, student_model_number, BATCH_SIZE, epochs, optimizer, max_lr, distill_optimizer, distill_lr, grad_clip, weight_decay, scheduler, kd_loss_type, heuristicToLayerDict]
+        trainingParameters = [teacher_model_number, student_model_number, BATCH_SIZE, epochs, optimizer, max_lr,
+                              distill_optimizer, distill_lr, grad_clip, weight_decay, scheduler, kd_loss_type,
+                              heuristicToLayerDict]
         solution = genetic_algorithm.evolve(trainingParameters)
         print("Best Solution")
         print("--------------")
