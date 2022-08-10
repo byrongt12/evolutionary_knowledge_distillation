@@ -543,7 +543,7 @@ class GeneticAlgorithm(object):
         torch.save(student_model.state_dict(), "../../../NeuralNetwork/resnet20_initial.ckpt")
 
         # Train student for 1 epoch and save its weights to a file:
-        student_model = train_student(student_model, 0, train_dl, test_dl, optimizer, max_lr, weight_decay, scheduler,
+        student_model = train_student(student_model, 1, train_dl, test_dl, optimizer, max_lr, weight_decay, scheduler,
                                       grad_clip)
 
         torch.save(student_model.state_dict(), "../../../NeuralNetwork/resnet20_initialized.ckpt")

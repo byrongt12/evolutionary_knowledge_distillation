@@ -265,6 +265,9 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimiz
 
         images, labels = batch
 
+        if not lossOnly:
+            kd_loss_arr = []
+
         for image in images:
 
             featureMapForTeacher = getFeatureMaps(teacher_model, device, image)[featureMapNumForTeacher]
@@ -289,11 +292,13 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimiz
 
             kd_loss_arr.append(distill_loss)
 
-            if not lossOnly:
-                distill_loss.backward()
-                distill_optimizer_implemented.step()
-                distill_optimizer_implemented.zero_grad()
-            else:
+            if lossOnly:
                 break  # Only using 1 image?
+
+        if not lossOnly:
+            total_loss = sum(kd_loss_arr)
+            total_loss.backward()
+            distill_optimizer_implemented.step()
+            distill_optimizer_implemented.zero_grad()
 
     return kd_loss_arr

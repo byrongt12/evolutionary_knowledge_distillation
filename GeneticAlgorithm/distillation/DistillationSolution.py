@@ -98,7 +98,7 @@ class DistillationSolution(Solution):
 
         torch.cuda.empty_cache()
 
-        lossArr = get_model_distill_loss_only(3,
+        lossArr = get_model_distill_loss_only(1,
                                               self.heuristic_combination,
                                               heuristicToLayerDict,
                                               train_dl,
