@@ -15,7 +15,6 @@ import torch
 import sys
 
 sys.path.append('/mnt/lustre/users/btomkinson/distill_code')
-print(sys.path)
 
 from GeneticAlgorithm.GeneticAlgorithm import GeneticAlgorithm
 from GeneticAlgorithm.distillation.DistillationProblem import DistillationProblem
