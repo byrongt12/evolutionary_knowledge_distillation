@@ -577,7 +577,7 @@ class GeneticAlgorithm(object):
         print("Completed evolving heuristic combination")
         print("Now training with heuristic combination...")
 
-        student_init_chk_path = "../../../NeuralNetwork/resnet20_initialized.ckpt"
+        student_init_chk_path = "../../../NeuralNetwork/resnet20_initial.ckpt"
         if path.exists(student_init_chk_path):
             student_model.load_state_dict(torch.load(student_init_chk_path))
         else:

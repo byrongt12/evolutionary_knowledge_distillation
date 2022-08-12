@@ -48,7 +48,7 @@ class GeneticAlgorithmMain(object):
         grad_clip = 0
         weight_decay = 0
         scheduler = torch.optim.lr_scheduler.OneCycleLR
-        kd_loss_type = 'ssim'
+        kd_loss_type = 'cosine'
 
         heuristicToLayerDict = {
             'a': 1,
