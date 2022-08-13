@@ -36,19 +36,19 @@ class GeneticAlgorithmMain(object):
         teacher_model_number = 18  # ResNet 110
         student_model_number = 3  # ResNet 20
 
-        epochs = 80
+        epochs = 40
         BATCH_SIZE = 100
 
         optimizer = torch.optim.Adam
         max_lr = 0.01
 
         distill_optimizer = torch.optim.SGD
-        distill_lr = 0.1
+        distill_lr = 1
 
         grad_clip = 0
         weight_decay = 0
         scheduler = torch.optim.lr_scheduler.OneCycleLR
-        kd_loss_type = 'cosine'
+        kd_loss_type = 'ssim'
 
         heuristicToLayerDict = {
             'a': 1,

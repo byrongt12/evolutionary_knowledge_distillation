@@ -218,7 +218,7 @@ def creatParametersList(student_model, layerForStudent, blockForStudent, convFor
     return params
 
 
-def distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr, batch,
+def distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer, distill_lr, batch,
             student_model,
             student_model_number, teacher_model, teacher_model_number, device, lossOnly=False):
 

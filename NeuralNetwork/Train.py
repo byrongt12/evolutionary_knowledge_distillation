@@ -128,22 +128,24 @@ def train_model(epochs, train_dl, test_dl, model, optimizer, max_lr, weight_deca
     return history
 
 
-def train_model_distill_only(numberOfEpochs, heuristicString, heuristicToLayerDict, train_dl, test_dl,
+def train_model_distill_only(numOfBatches, heuristicString, heuristicToLayerDict, train_dl, test_dl,
                              student_model, student_model_number, teacher_model,
-                             teacher_model_number, device, kd_loss_type, distill_optimizer,
+                             teacher_model_number, device, kd_loss_type, optimizer, distill_optimizer,
                              distill_lr):
     count = 0
 
-    for batch in train_dl:
+    for _ in range(numOfBatches):
 
+        batch = next(iter(train_dl))
+        print(count)
         count += 1
 
-        distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr,
+        distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer, distill_lr,
                 batch,  # HERE change to use with random batch
                 student_model,
-                student_model_number, teacher_model, teacher_model_number, device)
+                student_model_number, teacher_model, teacher_model_number, device, lossOnly=False)
 
-        if count >= numberOfEpochs:
+        if count >= numOfBatches:
             break
 
 
@@ -179,15 +181,15 @@ def train_model_normal_and_distill(heuristicString, heuristicToLayerDict, epochs
             scheduler.step()
             lrs.append(get_lr(optimizer))
 
-        distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr,
+        distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer, distill_lr,
                 next(iter(train_dl)),
                 student_model,
-                student_model_number, teacher_model, teacher_model_number, device, False)
+                student_model_number, teacher_model, teacher_model_number, device, lossOnly=False)
 
 
 def get_model_distill_loss_only(numOfBatches, heuristicString, heuristicToLayerDict, train_dl, test_dl,
                                 student_model, student_model_number, teacher_model,
-                                teacher_model_number, device, kd_loss_type, distill_optimizer,
+                                teacher_model_number, device, kd_loss_type, optimizer, distill_optimizer,
                                 distill_lr):
     # numOfBatches = 1 gives good results? (0.62 acc)
 
@@ -197,7 +199,8 @@ def get_model_distill_loss_only(numOfBatches, heuristicString, heuristicToLayerD
 
         count += 1
 
-        lossArr += distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr,
+        lossArr += distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer,
+                           distill_lr,
                            batch,
                            student_model,
                            student_model_number, teacher_model, teacher_model_number, device, lossOnly=True)
@@ -243,6 +246,7 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
                 nn.utils.clip_grad_value_(student_model.parameters(), grad_clip)
 
             optimizer.step()
+
             for param in student_model.parameters():  # instead of: optimizer.zero_grad()
                 param.grad = None
 
@@ -250,11 +254,10 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
             scheduler.step()
             lrs.append(get_lr(optimizer))
 
-        # HERE
-        distill(heuristicString, heuristicToLayerDict, kd_loss_type, distill_optimizer, distill_lr,
-                next(iter(train_dl)),
-                student_model,
-                student_model_number, teacher_model, teacher_model_number, device, lossOnly=False)
+        train_model_distill_only(10, heuristicString, heuristicToLayerDict, train_dl, test_dl,
+                                 student_model, student_model_number, teacher_model,
+                                 teacher_model_number, device, kd_loss_type, optimizer, distill_optimizer,
+                                 distill_lr)
 
         # Add results:
         result = evaluate(student_model, test_dl)

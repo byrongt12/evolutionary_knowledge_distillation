@@ -109,6 +109,7 @@ class DistillationSolution(Solution):
                                               teacher_model_number,
                                               device,
                                               kd_loss_type,
+                                              optimizer,
                                               distill_optimizer,
                                               distill_lr)
 
