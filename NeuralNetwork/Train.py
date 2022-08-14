@@ -137,7 +137,6 @@ def train_model_distill_only(numOfBatches, heuristicString, heuristicToLayerDict
     for _ in range(numOfBatches):
 
         batch = next(iter(train_dl))
-        print(count)
         count += 1
 
         distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer, distill_lr,
@@ -254,10 +253,10 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
             scheduler.step()
             lrs.append(get_lr(optimizer))
 
-        train_model_distill_only(10, heuristicString, heuristicToLayerDict, train_dl, test_dl,
-                                 student_model, student_model_number, teacher_model,
-                                 teacher_model_number, device, kd_loss_type, optimizer, distill_optimizer,
-                                 distill_lr)
+            distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer, distill_lr,
+                    batch,
+                    student_model,
+                    student_model_number, teacher_model, teacher_model_number, device, lossOnly=False)
 
         # Add results:
         result = evaluate(student_model, test_dl)
