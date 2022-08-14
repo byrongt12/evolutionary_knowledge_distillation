@@ -230,9 +230,10 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
         batch_count = 0
 
         for batch in train_dl:
-
-            batch_count += 1
             # print(batch_count)
+            batch_count += 1
+            if batch_count == 5:
+                break
 
             # Normal error and update
             loss, acc = student_model.training_step(batch)

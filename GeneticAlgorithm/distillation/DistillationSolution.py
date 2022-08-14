@@ -132,7 +132,7 @@ class DistillationSolution(Solution):
             newLoss = abs(loss)
             newLossArr.append(newLoss)
 
-        fitness = sum(newLossArr).data/len(self.heuristic_combination)
+        fitness = sum(newLossArr).data + (len(self.heuristic_combination)/2)/len(self.heuristic_combination)
 
         print(fitness)
 

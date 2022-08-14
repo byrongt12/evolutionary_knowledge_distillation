@@ -7,6 +7,7 @@ import torchvision.transforms as transforms
 from torchmetrics.functional import pairwise_euclidean_distance
 from torch.nn.functional import normalize
 
+
 def printLayerAndGradientBoolean(student_model):
     model_children = list(student_model.children())
     counter = 0
@@ -221,7 +222,6 @@ def creatParametersList(student_model, layerForStudent, blockForStudent, convFor
 def distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer, distill_lr, batch,
             student_model,
             student_model_number, teacher_model, teacher_model_number, device, lossOnly=False):
-
     student_model.train()  # put the model in train mode
 
     kd_loss_arr = []
@@ -297,7 +297,7 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, dist
 
         if not lossOnly:
             total_loss = sum(kd_loss_arr)
-            total_loss.backward()
+            total_loss.backward()  # backward on total loss takes long
             distill_optimizer_implemented.step()
             distill_optimizer_implemented.zero_grad()
 
