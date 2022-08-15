@@ -128,26 +128,6 @@ def train_model(epochs, train_dl, test_dl, model, optimizer, max_lr, weight_deca
     return history
 
 
-def train_model_distill_only(numOfBatches, heuristicString, heuristicToLayerDict, train_dl, test_dl,
-                             student_model, student_model_number, teacher_model,
-                             teacher_model_number, device, kd_loss_type, optimizer, distill_optimizer,
-                             distill_lr):
-    count = 0
-
-    for _ in range(numOfBatches):
-
-        batch = next(iter(train_dl))
-        count += 1
-
-        distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer, distill_lr,
-                batch,  # HERE change to use with random batch
-                student_model,
-                student_model_number, teacher_model, teacher_model_number, device, lossOnly=False)
-
-        if count >= numOfBatches:
-            break
-
-
 def train_model_normal_and_distill(heuristicString, heuristicToLayerDict, epochs, train_dl, test_dl, student_model,
                                    student_model_number, teacher_model,
                                    teacher_model_number, device, optimizer, max_lr,
@@ -190,8 +170,6 @@ def get_model_distill_loss_only(numOfBatches, heuristicString, heuristicToLayerD
                                 student_model, student_model_number, teacher_model,
                                 teacher_model_number, device, kd_loss_type, optimizer, distill_optimizer,
                                 distill_lr):
-    # numOfBatches = 1 gives good results? (0.62 acc)
-
     count = 0
     lossArr = []
     for batch in train_dl:
@@ -208,6 +186,26 @@ def get_model_distill_loss_only(numOfBatches, heuristicString, heuristicToLayerD
             break
 
     return lossArr
+
+
+def train_model_distill_only(numOfBatches, heuristicString, heuristicToLayerDict, train_dl, test_dl,
+                             student_model, student_model_number, teacher_model,
+                             teacher_model_number, device, kd_loss_type, optimizer, distill_optimizer,
+                             distill_lr):
+    count = 0
+
+    for _ in range(numOfBatches):
+
+        batch = next(iter(train_dl))
+        count += 1
+
+        distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer, distill_lr,
+                batch,  # HERE change to use with random batch
+                student_model,
+                student_model_number, teacher_model, teacher_model_number, device, lossOnly=False)
+
+        if count >= numOfBatches:
+            break
 
 
 def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs, train_dl, test_dl, student_model,
@@ -232,8 +230,6 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
         for batch in train_dl:
             # print(batch_count)
             batch_count += 1
-            if batch_count == 5:
-                break
 
             # Normal error and update
             loss, acc = student_model.training_step(batch)
@@ -254,10 +250,10 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
             scheduler.step()
             lrs.append(get_lr(optimizer))
 
-            distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer, distill_lr,
-                    batch,
-                    student_model,
-                    student_model_number, teacher_model, teacher_model_number, device, lossOnly=False)
+        distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer, distill_lr,
+                next(iter(train_dl)),
+                student_model,
+                student_model_number, teacher_model, teacher_model_number, device, lossOnly=False)
 
         # Add results:
         result = evaluate(student_model, test_dl)
