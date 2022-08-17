@@ -160,6 +160,16 @@ class GeneticAlgorithm(object):
                 self.initial_max_length = int(f.readline())
                 self.offspring_max_length = int(f.readline())
                 self.mutation_length = int(f.readline())
+
+            print("Population size: " + str(self.population_size))
+            print("Tournament size: " + str(self.tournament_size))
+            print("Number of generations: " + str(self.no_of_generations))
+            print("Mutation rate: " + str(self.mutation_rate))
+            print("Crossover rate: " + str(self.crossover_rate))
+            print("Initial max length: " + str(self.initial_max_length))
+            print("Offspring max length: " + str(self.offspring_max_length))
+            print("Mutation length: " + str(self.mutation_length))
+
         except IOError as ioe:
             print("The file " + parameter_file + " cannot be found. " + "Please check the details provided.", ioe)
 

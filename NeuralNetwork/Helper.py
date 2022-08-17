@@ -219,6 +219,15 @@ def creatParametersList(student_model, layerForStudent, blockForStudent, convFor
     return params
 
 
+def getRandomBatches(numOfBatches, dataLoader):
+    randomBatches = []
+
+    for _ in range(numOfBatches):
+        randomBatches += [next(iter(dataLoader))]
+
+    return randomBatches
+
+
 def distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer, distill_lr, batch,
             student_model,
             student_model_number, teacher_model, teacher_model_number, device, lossOnly=False):
@@ -288,7 +297,7 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, dist
             elif kd_loss_type == 'cosine':
                 distill_loss = F.cosine_similarity(t.reshape(1, -1), s.reshape(1, -1))
             elif kd_loss_type == 'euclidean':
-                distill_loss = pairwise_euclidean_distance(t.reshape(1, -1), s.reshape(1, -1))
+                distill_loss = -pairwise_euclidean_distance(t.reshape(1, -1), s.reshape(1, -1))
 
             kd_loss_arr.append(distill_loss)
 
