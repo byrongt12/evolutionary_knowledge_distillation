@@ -99,14 +99,14 @@ class DistillationSolution(Solution):
 
         torch.cuda.empty_cache()
 
-        result_before_distill = evaluate(student_model, getRandomBatches(3, train_dl))
+        result_before_distill = evaluate(student_model, getRandomBatches(30, train_dl))
 
         train_model_distill_only(1, self.heuristic_combination, heuristicToLayerDict, train_dl, test_dl,
                                  student_model, student_model_number, teacher_model,
                                  teacher_model_number, device, kd_loss_type, optimizer, distill_optimizer,
                                  distill_lr)
 
-        result_after_distill = evaluate(student_model, getRandomBatches(3, train_dl))
+        result_after_distill = evaluate(student_model, getRandomBatches(30, train_dl))
 
         acc_change = result_after_distill['val_acc'] - result_before_distill['val_acc']
 
