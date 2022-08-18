@@ -295,7 +295,7 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, dist
             # Loss functions: Cosine, SSIM, PSNR and Euclidean dist
             distill_loss = 0
             if kd_loss_type == 'ssim':
-                distill_loss = ssim_loss(s, t, max_val=1.0, window_size=1)
+                distill_loss = -1 * ssim_loss(s, t, max_val=2.0, window_size=1)
             elif kd_loss_type == 'psnr':
                 distill_loss = psnr_loss(s, t, max_val=1.0)
             elif kd_loss_type == 'cosine':
