@@ -105,6 +105,7 @@ class GeneticAlgorithmMain(object):
                               distill_optimizer, distill_lr, grad_clip, weight_decay, scheduler, kd_loss_type,
                               heuristicToLayerDict]
         solution = genetic_algorithm.evolve(trainingParameters)
+
         print("Best Solution")
         print("--------------")
         print("Fitness:", solution.get_fitness())
