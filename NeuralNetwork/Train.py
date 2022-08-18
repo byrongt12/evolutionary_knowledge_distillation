@@ -220,6 +220,7 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
 
     optimizer = optimizer(student_model.parameters(), max_lr, weight_decay=weight_decay)
     scheduler = scheduler(optimizer, max_lr, epochs=epochs, steps_per_epoch=len(train_dl))
+    distill_optimizer_implemented = distill_optimizer(student_model.parameters(), lr=distill_lr)
 
     for epoch in range(epochs):
         student_model.train()  # put the model in train mode
@@ -235,11 +236,6 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
 
             batch_count += 1
 
-            # Normal error and update
-            loss, acc = student_model.training_step(batch)
-            train_loss.append(loss)
-            train_acc.append(acc)
-
             kd_loss_arr = distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer,
                                   distill_lr,
                                   batch,
@@ -248,6 +244,14 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
 
             for kd_loss in kd_loss_arr:
                 kd_loss.backward(retain_graph=True)
+
+            distill_optimizer_implemented.step()
+            distill_optimizer_implemented.zero_grad()
+
+            # Normal error and update
+            loss, acc = student_model.training_step(batch)
+            train_loss.append(loss)
+            train_acc.append(acc)
 
             loss.backward()
 
@@ -285,6 +289,7 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
 
     optimizer = optimizer(student_model.parameters(), max_lr, weight_decay=weight_decay)
     scheduler = scheduler(optimizer, max_lr, epochs=epochs, steps_per_epoch=len(train_dl))
+    distill_optimizer_implemented = distill_optimizer(student_model.parameters(), lr=distill_lr)
 
     for epoch in range(epochs):
         student_model.train()  # put the model in train mode
@@ -297,11 +302,6 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
             # print(batch_count)
             batch_count += 1
 
-            # Normal error and update
-            loss, acc = student_model.training_step(batch)
-            train_loss.append(loss)
-            train_acc.append(acc)
-
             kd_loss_arr = distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer,
                                   distill_lr,
                                   batch,
@@ -310,6 +310,14 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
 
             for kd_loss in kd_loss_arr:
                 kd_loss.backward(retain_graph=True)
+
+            distill_optimizer_implemented.step()
+            distill_optimizer_implemented.zero_grad()
+
+            # Normal error and update
+            loss, acc = student_model.training_step(batch)
+            train_loss.append(loss)
+            train_acc.append(acc)
 
             loss.backward()
 

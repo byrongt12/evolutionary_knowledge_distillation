@@ -5,7 +5,7 @@ from GeneticAlgorithm.GeneticAlgorithm import GeneticAlgorithm
 
 
 class GeneticAlgorithmProcess(mp.Process):
-    def __init__(self, gen_alg: GeneticAlgorithm, population_queue: Queue, best_queue: Queue):
+    def __init__(self, gen_alg: GeneticAlgorithm, population_queue: Queue, best_queue: Queue, trainingItems):
         super().__init__()
         self.gen_alg = gen_alg
         self.best = None
@@ -13,13 +13,15 @@ class GeneticAlgorithmProcess(mp.Process):
         self.population_queue = population_queue
         self.best_queue = best_queue
 
+        self.trainingItems = trainingItems
+
 
 class GeneticAlgorithmProcessCreate(GeneticAlgorithmProcess):
-    def __init__(self, gen_alg: GeneticAlgorithm, population_queue: Queue, best_queue: Queue):
-        super().__init__(gen_alg, population_queue, best_queue)
+    def __init__(self, gen_alg: GeneticAlgorithm, population_queue: Queue, best_queue: Queue, trainingItems):
+        super().__init__(gen_alg, population_queue, best_queue, trainingItems)
 
     def run(self) -> None:
-        self.best = self.gen_alg.create_population()
+        self.best = self.gen_alg.create_population(self.trainingItems)
         self.best_queue.put(self.best)
         self.population_queue.put(self.gen_alg.population)
 

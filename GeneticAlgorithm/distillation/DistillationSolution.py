@@ -99,7 +99,7 @@ class DistillationSolution(Solution):
 
         torch.cuda.empty_cache()
 
-        history = train_model_partial_with_distillation(self.heuristic_combination, heuristicToLayerDict, 5, 2,
+        history = train_model_partial_with_distillation(self.heuristic_combination, heuristicToLayerDict, 5, 50,
                                                         train_dl, test_dl,
                                                         student_model,
                                                         student_model_number, teacher_model,
@@ -107,15 +107,10 @@ class DistillationSolution(Solution):
                                                         weight_decay, scheduler, kd_loss_type, distill_optimizer,
                                                         distill_lr)
 
-        result_before_distill = history[0]
-        result_after_distill = history[-1]
+        result = history[-1]
 
-        acc_change = result_after_distill['train_acc'] - result_before_distill['train_acc']
+        fitness = result['train_acc']
 
-        loss_change = result_before_distill['train_loss'] - result_after_distill['train_loss']
-
-        fitness = loss_change
-
-        print(loss_change)
+        print(fitness)
 
         self.fitness = fitness

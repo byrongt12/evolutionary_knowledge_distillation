@@ -75,13 +75,13 @@ class DistributedGeneticAlgorithm(GeneticAlgorithm):
         genetic_algorithm.mutation_length = self.mutation_length
         return genetic_algorithm
 
-    def create_population(self) -> Solution:
+    def create_population(self, trainingItems) -> Solution:
         self.population = []
         count = 0
 
         while count < self.no_of_cores:
             gen_alg = self.create_genetic_algorithm()
-            process = GeneticAlgorithmProcessCreate(gen_alg, self.population_queue, self.best_queue)
+            process = GeneticAlgorithmProcessCreate(gen_alg, self.population_queue, self.best_queue, trainingItems)
             process.start()
             self.processes.append(process)
             count += 1
@@ -97,10 +97,10 @@ class DistributedGeneticAlgorithm(GeneticAlgorithm):
             self.population.extend(self.population_queue.get())
         return best
 
-    def evaluate(self, ind):
-        return self.problem.evaluate(ind)
+    def evaluate(self, ind, trainingItems):
+        return self.problem.evaluate(ind, trainingItems)
 
-    def regenerate(self, best_individual: Solution):
+    def regenerate(self, best_individual, trainingItems: Solution):
         core_population_size = int(self.population_size / self.no_of_cores)
         for i in range(len(self.processes)):
             gen_alg = self.create_genetic_algorithm()
