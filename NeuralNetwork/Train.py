@@ -81,7 +81,6 @@ def train_student(student_model, numOfEpochs, train_dl, test_dl, optimizer, max_
         student_model.epoch_end(epoch, result)
         history.append(result)
 
-    torch.save(student_model.state_dict(), "../../../NeuralNetwork/resnet20.ckpt")
     print("Student model partially trained for: " + str(numOfEpochs) + " epochs.")
     return student_model
 
