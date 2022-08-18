@@ -43,7 +43,7 @@ class GeneticAlgorithmMain(object):
         max_lr = 0.01
 
         distill_optimizer = torch.optim.Adam
-        distill_lr = 0.005
+        distill_lr = 0.001
 
         grad_clip = 0
         weight_decay = 0
