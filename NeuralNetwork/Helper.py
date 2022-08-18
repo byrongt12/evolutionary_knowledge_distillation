@@ -228,6 +228,10 @@ def getRandomBatches(numOfBatches, dataLoader):
     return randomBatches
 
 
+def weights_init(m):
+    if isinstance(m, nn.Conv2d):
+        torch.nn.init.xavier_uniform(m.weight.data)
+
 def distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer, distill_lr, batch,
             student_model,
             student_model_number, teacher_model, teacher_model_number, device, lossOnly=False):
@@ -301,8 +305,7 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, dist
 
             kd_loss_arr.append(distill_loss)
 
-            if lossOnly:
-                break  # Only using 1 image?
+            break  # Only using 1 image
 
         if not lossOnly:
             total_loss = sum(kd_loss_arr)

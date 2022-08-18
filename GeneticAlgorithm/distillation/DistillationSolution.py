@@ -12,9 +12,9 @@ import torch
 from os import path
 
 from GeneticAlgorithm.Solution import Solution
-from NeuralNetwork.Helper import getRandomBatches
+from NeuralNetwork.Helper import getRandomBatches, weights_init
 from NeuralNetwork.Train import train_model_distill_only, evaluate, train_model_normal_and_distill, \
-    get_model_distill_loss_only
+    get_model_distill_loss_only, train_model_with_distillation, train_model_partial_with_distillation
 
 
 class DistillationSolution(Solution):
@@ -99,43 +99,23 @@ class DistillationSolution(Solution):
 
         torch.cuda.empty_cache()
 
-        result_before_distill = evaluate(student_model, getRandomBatches(30, train_dl))
+        history = train_model_partial_with_distillation(self.heuristic_combination, heuristicToLayerDict, 5, 2,
+                                                        train_dl, test_dl,
+                                                        student_model,
+                                                        student_model_number, teacher_model,
+                                                        teacher_model_number, device, optimizer, max_lr,
+                                                        weight_decay, scheduler, kd_loss_type, distill_optimizer,
+                                                        distill_lr)
 
-        train_model_distill_only(1, self.heuristic_combination, heuristicToLayerDict, train_dl, test_dl,
-                                 student_model, student_model_number, teacher_model,
-                                 teacher_model_number, device, kd_loss_type, optimizer, distill_optimizer,
-                                 distill_lr)
+        result_before_distill = history[0]
+        result_after_distill = history[-1]
 
-        result_after_distill = evaluate(student_model, getRandomBatches(30, train_dl))
+        acc_change = result_after_distill['train_acc'] - result_before_distill['train_acc']
 
-        acc_change = result_after_distill['val_acc'] - result_before_distill['val_acc']
+        loss_change = result_before_distill['train_loss'] - result_after_distill['train_loss']
 
-        loss_change = result_before_distill['val_loss'] - result_after_distill['val_loss']
+        fitness = loss_change
 
-        fitness = acc_change
-
-        '''lossArr = get_model_distill_loss_only(1,
-                                              self.heuristic_combination,
-                                              heuristicToLayerDict,
-                                              train_dl,
-                                              test_dl,
-                                              student_model,
-                                              student_model_number,
-                                              teacher_model,
-                                              teacher_model_number,
-                                              device,
-                                              kd_loss_type,
-                                              optimizer,
-                                              distill_optimizer,
-                                              distill_lr)
-
-        newLossArr = []
-        for loss in lossArr:
-            newLoss = abs(loss)
-            newLossArr.append(newLoss)
-
-        fitness = sum(newLossArr).data + (len(self.heuristic_combination)/2)/len(self.heuristic_combination)'''
-
-        print(acc_change)
+        print(loss_change)
 
         self.fitness = fitness

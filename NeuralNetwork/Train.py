@@ -208,6 +208,73 @@ def train_model_distill_only(numOfBatches, heuristicString, heuristicToLayerDict
             break
 
 
+def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict, epochs, numOfBatches, train_dl,
+                                          test_dl,
+                                          student_model,
+                                          student_model_number, teacher_model,
+                                          teacher_model_number, device, optimizer, max_lr,
+                                          weight_decay, scheduler, kd_loss_type, distill_optimizer,
+                                          distill_lr,
+                                          grad_clip=None):
+    torch.cuda.empty_cache()
+    history = []
+
+    optimizer = optimizer(student_model.parameters(), max_lr, weight_decay=weight_decay)
+    scheduler = scheduler(optimizer, max_lr, epochs=epochs, steps_per_epoch=len(train_dl))
+
+    for epoch in range(epochs):
+        student_model.train()  # put the model in train mode
+        train_loss = []
+        train_acc = []
+        lrs = []
+        batch_count = 0
+
+        for batch in train_dl:
+
+            if batch_count == numOfBatches:
+                break
+
+            batch_count += 1
+
+            # Normal error and update
+            loss, acc = student_model.training_step(batch)
+            train_loss.append(loss)
+            train_acc.append(acc)
+
+            kd_loss_arr = distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer,
+                                  distill_lr,
+                                  batch,
+                                  student_model,
+                                  student_model_number, teacher_model, teacher_model_number, device, lossOnly=True)
+
+            for kd_loss in kd_loss_arr:
+                kd_loss.backward(retain_graph=True)
+
+            loss.backward()
+
+            if grad_clip:
+                nn.utils.clip_grad_value_(student_model.parameters(), grad_clip)
+
+            optimizer.step()
+
+            for param in student_model.parameters():  # instead of: optimizer.zero_grad()
+                param.grad = None
+
+            # Step scheduler
+            scheduler.step()
+            lrs.append(get_lr(optimizer))
+
+        # Add results:
+        result = evaluate(student_model, test_dl)
+        result["train_loss"] = torch.stack(train_loss).mean().item()
+        result["train_acc"] = torch.stack(train_acc).mean().item()
+        result["lrs"] = lrs
+        student_model.epoch_end(epoch, result)
+        history.append(result)
+
+    return history
+
+
 def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs, train_dl, test_dl, student_model,
                                   student_model_number, teacher_model,
                                   teacher_model_number, device, optimizer, max_lr,
@@ -236,6 +303,15 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
             train_loss.append(loss)
             train_acc.append(acc)
 
+            kd_loss_arr = distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer,
+                                  distill_lr,
+                                  batch,
+                                  student_model,
+                                  student_model_number, teacher_model, teacher_model_number, device, lossOnly=True)
+
+            for kd_loss in kd_loss_arr:
+                kd_loss.backward(retain_graph=True)
+
             loss.backward()
 
             if grad_clip:
@@ -249,11 +325,6 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
             # Step scheduler
             scheduler.step()
             lrs.append(get_lr(optimizer))
-
-        distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer, distill_lr,
-                next(iter(train_dl)),
-                student_model,
-                student_model_number, teacher_model, teacher_model_number, device, lossOnly=False)
 
         # Add results:
         result = evaluate(student_model, test_dl)
