@@ -36,7 +36,7 @@ class GeneticAlgorithmMain(object):
         teacher_model_number = 18  # ResNet 110
         student_model_number = 3  # ResNet 20
 
-        epochs = 20
+        epochs = 40
         BATCH_SIZE = 100
 
         optimizer = torch.optim.Adam
