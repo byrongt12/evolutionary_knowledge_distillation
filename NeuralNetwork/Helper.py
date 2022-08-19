@@ -232,6 +232,7 @@ def weights_init(m):
     if isinstance(m, nn.Conv2d):
         torch.nn.init.xavier_uniform(m.weight.data)
 
+
 def distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer, distill_lr, batch,
             student_model,
             student_model_number, teacher_model, teacher_model_number, device, lossOnly=False):
@@ -288,9 +289,9 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, dist
 
             # Normalize tensor so NaN values do not get produced by loss function
             t = normalize(featureMapForTeacher, p=1.0, dim=2)
-            t = normalize(t, p=1.0, dim=3)
+            t = normalize(t, p=2.0, dim=3)
             s = normalize(featureMapForStudent, p=1.0, dim=2)
-            s = normalize(s, p=1.0, dim=3)
+            s = normalize(s, p=2.0, dim=3)
 
             # Loss functions: Cosine, SSIM, PSNR and Euclidean dist
             distill_loss = 0
@@ -299,9 +300,14 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, dist
             elif kd_loss_type == 'psnr':
                 distill_loss = psnr_loss(s, t, max_val=1.0)
             elif kd_loss_type == 'cosine':
-                distill_loss = F.cosine_similarity(t.reshape(1, -1), s.reshape(1, -1))
+                distill_loss = F.cosine_similarity(s.reshape(1, -1), t.reshape(1, -1))
             elif kd_loss_type == 'euclidean':
-                distill_loss = pairwise_euclidean_distance(t.reshape(1, -1), s.reshape(1, -1))
+                distill_loss = pairwise_euclidean_distance(s.reshape(1, -1), t.reshape(1, -1))
+            elif kd_loss_type == 'mse':
+                loss = nn.MSELoss(reduction='none')
+                distill_loss = torch.sum(loss(featureMapForStudent, featureMapForTeacher), dim=0)
+                distill_loss = torch.sum(distill_loss, dim=1)
+                distill_loss = torch.sum(distill_loss)
 
             kd_loss_arr.append(distill_loss)
 

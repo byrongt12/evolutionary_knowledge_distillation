@@ -109,7 +109,7 @@ class DistillationSolution(Solution):
 
         result = history[-1]
 
-        fitness = result['train_acc']
+        fitness = result['val_acc']
 
         print(fitness)
 
