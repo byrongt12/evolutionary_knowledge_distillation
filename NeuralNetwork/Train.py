@@ -193,9 +193,11 @@ def train_model_distill_only(numOfBatches, heuristicString, heuristicToLayerDict
                              distill_lr):
     count = 0
 
-    for _ in range(numOfBatches):
+    for batch in train_dl:
 
-        batch = next(iter(train_dl))
+        if count == numOfBatches:
+            break
+
         count += 1
 
         distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer, distill_lr,
@@ -242,9 +244,8 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
                                   student_model,
                                   student_model_number, teacher_model, teacher_model_number, device, lossOnly=True)
 
-            for kd_loss in kd_loss_arr:
-                kd_loss.backward(retain_graph=True)
-
+            avg_kd_loss = sum(kd_loss_arr) / len(kd_loss_arr)
+            avg_kd_loss.backward()
             distill_optimizer_implemented.step()
             distill_optimizer_implemented.zero_grad()
 
@@ -308,9 +309,8 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
                                   student_model,
                                   student_model_number, teacher_model, teacher_model_number, device, lossOnly=True)
 
-            for kd_loss in kd_loss_arr:
-                kd_loss.backward(retain_graph=True)
-
+            avg_kd_loss = sum(kd_loss_arr) / len(kd_loss_arr)
+            avg_kd_loss.backward()
             distill_optimizer_implemented.step()
             distill_optimizer_implemented.zero_grad()
 

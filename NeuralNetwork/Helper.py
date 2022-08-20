@@ -289,9 +289,9 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, dist
 
             # Normalize tensor so NaN values do not get produced by loss function
             t = normalize(featureMapForTeacher, p=1.0, dim=2)
-            t = normalize(t, p=2.0, dim=3)
+            t = normalize(t, p=1.0, dim=3)
             s = normalize(featureMapForStudent, p=1.0, dim=2)
-            s = normalize(s, p=2.0, dim=3)
+            s = normalize(s, p=1.0, dim=3)
 
             # Loss functions: Cosine, SSIM, PSNR and Euclidean dist
             distill_loss = 0
@@ -311,11 +311,11 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, dist
 
             kd_loss_arr.append(distill_loss)
 
-            break  # Only using 1 image
+            # break  # Only using 1 image
 
         if not lossOnly:
-            total_loss = sum(kd_loss_arr)
-            total_loss.backward()  # backward on total loss takes long
+            avg_kd_loss = sum(kd_loss_arr)/len(kd_loss_arr)
+            avg_kd_loss.backward()
             distill_optimizer_implemented.step()
             distill_optimizer_implemented.zero_grad()
 
