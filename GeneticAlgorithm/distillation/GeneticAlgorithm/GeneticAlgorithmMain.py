@@ -40,15 +40,14 @@ class GeneticAlgorithmMain(object):
         BATCH_SIZE = 100
 
         optimizer = torch.optim.Adam
+        scheduler = torch.optim.lr_scheduler.OneCycleLR
         max_lr = 0.0001
-
-        distill_optimizer = torch.optim.Adam
-        distill_lr = 0.01
-
         grad_clip = 0
         weight_decay = 0
-        scheduler = torch.optim.lr_scheduler.OneCycleLR
-        kd_loss_type = 'ssim'
+
+        distill_optimizer = torch.optim.Adam
+        distill_lr = 0.001
+        kd_loss_type = 'cosine'
 
         heuristicToLayerDict = {
             'a': 1,

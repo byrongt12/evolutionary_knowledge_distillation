@@ -272,17 +272,14 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, dist
 
         featureMapNumForTeacherArr.append(teacher_layer_number)
 
-    for i in range(0, (len(featureMapNumForStudentArr))):
+    images, labels = batch
 
-        featureMapNumForStudent = featureMapNumForStudentArr[i]
-        featureMapNumForTeacher = featureMapNumForTeacherArr[i]
+    for image in images:
 
-        images, labels = batch
+        for i in range(0, (len(featureMapNumForStudentArr))):
 
-        if not lossOnly:
-            kd_loss_arr = []
-
-        for image in images:
+            featureMapNumForStudent = featureMapNumForStudentArr[i]
+            featureMapNumForTeacher = featureMapNumForTeacherArr[i]
 
             featureMapForTeacher = getFeatureMaps(teacher_model, device, image)[featureMapNumForTeacher]
             featureMapForStudent = getFeatureMaps(student_model, device, image)[featureMapNumForStudent]
@@ -311,12 +308,13 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, dist
 
             kd_loss_arr.append(distill_loss)
 
-            # break  # Only using 1 image
+    if not lossOnly:
+        for kd_loss in kd_loss_arr:
+            kd_loss.backward(retain_graph=True)
 
-        if not lossOnly:
-            avg_kd_loss = sum(kd_loss_arr)/len(kd_loss_arr)
-            avg_kd_loss.backward()
-            distill_optimizer_implemented.step()
-            distill_optimizer_implemented.zero_grad()
+        distill_optimizer_implemented.step()
+
+        for param in student_model.parameters():  # instead of: optimizer.zero_grad()
+            param.grad = None
 
     return kd_loss_arr

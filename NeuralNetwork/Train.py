@@ -221,14 +221,13 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
     history = []
 
     optimizer = optimizer(student_model.parameters(), max_lr, weight_decay=weight_decay)
-    scheduler = scheduler(optimizer, max_lr, epochs=epochs, steps_per_epoch=len(train_dl))
     distill_optimizer_implemented = distill_optimizer(student_model.parameters(), lr=distill_lr)
 
     for epoch in range(epochs):
         student_model.train()  # put the model in train mode
         train_loss = []
         train_acc = []
-        lrs = []
+
         batch_count = 0
 
         for batch in train_dl:
@@ -244,10 +243,13 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
                                   student_model,
                                   student_model_number, teacher_model, teacher_model_number, device, lossOnly=True)
 
-            avg_kd_loss = sum(kd_loss_arr) / len(kd_loss_arr)
-            avg_kd_loss.backward()
+            for kd_loss in kd_loss_arr:
+                kd_loss.backward(retain_graph=True)
+
             distill_optimizer_implemented.step()
-            distill_optimizer_implemented.zero_grad()
+
+            for param in student_model.parameters():  # instead of: optimizer.zero_grad()
+                param.grad = None
 
             # Normal error and update
             loss, acc = student_model.training_step(batch)
@@ -264,16 +266,10 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
             for param in student_model.parameters():  # instead of: optimizer.zero_grad()
                 param.grad = None
 
-            # Step scheduler
-            scheduler.step()
-            lrs.append(get_lr(optimizer))
-
         # Add results:
         result = evaluate(student_model, test_dl)
         result["train_loss"] = torch.stack(train_loss).mean().item()
         result["train_acc"] = torch.stack(train_acc).mean().item()
-        result["lrs"] = lrs
-        student_model.epoch_end(epoch, result)
         history.append(result)
 
     return history
@@ -300,7 +296,10 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
         batch_count = 0
 
         for batch in train_dl:
-            # print(batch_count)
+
+            if batch_count == 20:
+                break
+
             batch_count += 1
 
             kd_loss_arr = distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer,
@@ -309,10 +308,13 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
                                   student_model,
                                   student_model_number, teacher_model, teacher_model_number, device, lossOnly=True)
 
-            avg_kd_loss = sum(kd_loss_arr) / len(kd_loss_arr)
-            avg_kd_loss.backward()
+            for kd_loss in kd_loss_arr:
+                kd_loss.backward(retain_graph=True)
+
             distill_optimizer_implemented.step()
-            distill_optimizer_implemented.zero_grad()
+
+            for param in student_model.parameters():  # instead of: optimizer.zero_grad()
+                param.grad = None
 
             # Normal error and update
             loss, acc = student_model.training_step(batch)

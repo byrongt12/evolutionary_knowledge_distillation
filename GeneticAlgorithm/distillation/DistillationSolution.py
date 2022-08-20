@@ -99,10 +99,13 @@ class DistillationSolution(Solution):
 
         torch.cuda.empty_cache()
 
-        train_model_distill_only(3, self.heuristic_combination, heuristicToLayerDict, train_dl, test_dl,
-                                 student_model, student_model_number, teacher_model,
-                                 teacher_model_number, device, kd_loss_type, optimizer, distill_optimizer,
-                                 distill_lr)
+        train_model_partial_with_distillation(self.heuristic_combination, heuristicToLayerDict, 1, 2, train_dl,
+                                              test_dl,
+                                              student_model,
+                                              student_model_number, teacher_model,
+                                              teacher_model_number, device, optimizer, 0.001,
+                                              weight_decay, scheduler, kd_loss_type, distill_optimizer,
+                                              distill_lr)
 
         result = evaluate(student_model, test_dl)
 
