@@ -99,29 +99,14 @@ class DistillationSolution(Solution):
 
         torch.cuda.empty_cache()
 
-        history = train_model_partial_with_distillation(self.heuristic_combination, heuristicToLayerDict, 4, 20,
-                                                        train_dl, test_dl,
-                                                        student_model,
-                                                        student_model_number, teacher_model,
-                                                        teacher_model_number, device, optimizer, max_lr,
-                                                        weight_decay, scheduler, kd_loss_type, distill_optimizer,
-                                                        distill_lr)
+        train_model_distill_only(1, self.heuristic_combination, heuristicToLayerDict, train_dl, test_dl,
+                                 student_model, student_model_number, teacher_model,
+                                 teacher_model_number, device, kd_loss_type, optimizer, distill_optimizer,
+                                 distill_lr)
 
-        length = len(history)
+        result = evaluate(student_model, test_dl)
 
-        total = 0
-        for x in range(int(length/2)):
-            total += history[x]['val_acc']
-        avg_first_half = total/int(length/2)
-
-        history.reverse()
-
-        total = 0
-        for x in range(int(length/2)):
-            total += history[x]['val_acc']
-        avg_second_half = total/int(length/2)
-
-        fitness = avg_second_half - avg_first_half
+        fitness = result['val_acc']
 
         print(fitness)
 

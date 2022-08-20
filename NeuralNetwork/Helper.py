@@ -1,7 +1,7 @@
 import torch  # need this for eval function
 import torch.nn as nn
 import torch.nn.functional as F
-from kornia.losses import psnr_loss, lovasz_softmax_loss, ssim_loss
+from kornia.losses import psnr_loss, ssim_loss
 from matplotlib import pyplot as plt
 import torchvision.transforms as transforms
 from torchmetrics.functional import pairwise_euclidean_distance

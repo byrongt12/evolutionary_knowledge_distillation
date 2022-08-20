@@ -199,7 +199,7 @@ def train_model_distill_only(numOfBatches, heuristicString, heuristicToLayerDict
         count += 1
 
         distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer, distill_lr,
-                batch,  # HERE change to use with random batch
+                batch,
                 student_model,
                 student_model_number, teacher_model, teacher_model_number, device, lossOnly=False)
 
