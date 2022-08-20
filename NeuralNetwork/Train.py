@@ -297,7 +297,7 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
 
         for batch in train_dl:
 
-            if batch_count == 20:
+            if batch_count == 20:   # HERE: Because new distill on all images in batch takes long.
                 break
 
             batch_count += 1
