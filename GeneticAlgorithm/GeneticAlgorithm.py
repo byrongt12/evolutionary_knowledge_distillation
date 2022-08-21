@@ -554,15 +554,14 @@ class GeneticAlgorithm(object):
         torch.save(student_model.state_dict(), "../../../NeuralNetwork/resnet20_initial.ckpt")
 
         # Train student for x epoch(s) and save its weights to a file:
-
-        student_initialized_chk_path = "../../../NeuralNetwork/resnet20_initialized.ckpt"
+        student_initialized_chk_path = "../../../NeuralNetwork/resnet20_initialized_10_epochs.ckpt"
         if not path.exists(student_initialized_chk_path):
             print("Training student model before distillation experimentation...")
-            student_model = train_student(student_model, 80, train_dl, test_dl, optimizer, 0.01, weight_decay,
+            student_model = train_student(student_model, 10, train_dl, test_dl, optimizer, 0.01, weight_decay,
                                           scheduler,
                                           grad_clip)
 
-            torch.save(student_model.state_dict(), "../../../NeuralNetwork/resnet20_initialized.ckpt")
+            torch.save(student_model.state_dict(), "../../../NeuralNetwork/resnet20_initialized_10_epochs.ckpt")
         else:
             print("Partially trained student model found.")
 
@@ -595,7 +594,7 @@ class GeneticAlgorithm(object):
         print("Completed evolving heuristic combination")
         print("Now training with heuristic combination...")
 
-        student_init_chk_path = "../../../NeuralNetwork/resnet20_initialized.ckpt"
+        student_init_chk_path = "../../../NeuralNetwork/resnet20_initialized_80_epochs.ckpt"
         if path.exists(student_init_chk_path):
             student_model.load_state_dict(torch.load(student_init_chk_path))
         else:

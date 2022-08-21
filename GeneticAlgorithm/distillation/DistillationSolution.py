@@ -90,7 +90,7 @@ class DistillationSolution(Solution):
         distill_lr = trainingItems[15]
         grad_clip = trainingItems[16]
 
-        student_chk_path = "../../../NeuralNetwork/resnet20_initialized.ckpt"
+        student_chk_path = "../../../NeuralNetwork/resnet20_initialized_10_epochs.ckpt"
         if path.exists(student_chk_path):
             student_model.load_state_dict(torch.load(student_chk_path))
         else:
@@ -99,11 +99,11 @@ class DistillationSolution(Solution):
 
         torch.cuda.empty_cache()
 
-        train_model_partial_with_distillation(self.heuristic_combination, heuristicToLayerDict, 1, 2, train_dl,
+        train_model_partial_with_distillation(self.heuristic_combination, heuristicToLayerDict, 1, 10, train_dl,
                                               test_dl,
                                               student_model,
                                               student_model_number, teacher_model,
-                                              teacher_model_number, device, optimizer, 0.001,
+                                              teacher_model_number, device, optimizer, max_lr,
                                               weight_decay, scheduler, kd_loss_type, distill_optimizer,
                                               distill_lr)
 
