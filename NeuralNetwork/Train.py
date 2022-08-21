@@ -232,22 +232,24 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
 
         for batch in train_dl:
 
-            if batch_count <= numOfBatches:
-                kd_loss_arr = distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer,
-                                      distill_lr,
-                                      batch,
-                                      student_model,
-                                      student_model_number, teacher_model, teacher_model_number, device, lossOnly=True)
+            if batch_count == numOfBatches:
+                break
 
-                for kd_loss in kd_loss_arr:
-                    kd_loss.backward(retain_graph=True)
+            kd_loss_arr = distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer,
+                                  distill_lr,
+                                  batch,
+                                  student_model,
+                                  student_model_number, teacher_model, teacher_model_number, device, lossOnly=True)
 
-                distill_optimizer_implemented.step()
+            for kd_loss in kd_loss_arr:
+                kd_loss.backward(retain_graph=True)
 
-                for param in student_model.parameters():  # instead of: optimizer.zero_grad()
-                    param.grad = None
+            distill_optimizer_implemented.step()
 
-            # Normal error and update
+            for param in student_model.parameters():  # instead of: optimizer.zero_grad()
+                param.grad = None
+
+            '''# Normal error and update
             loss, acc = student_model.training_step(batch)
             train_loss.append(loss)
             train_acc.append(acc)
@@ -260,7 +262,7 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
             optimizer.step()
 
             for param in student_model.parameters():  # instead of: optimizer.zero_grad()
-                param.grad = None
+                param.grad = None'''
 
             batch_count += 1
 
@@ -289,7 +291,7 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
 
         for batch in train_dl:
 
-            if batch_count <= 2:
+            if batch_count <= 10:
                 kd_loss_arr = distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer,
                                       distill_lr,
                                       batch,

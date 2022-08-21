@@ -276,13 +276,16 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, dist
 
     for image in images:
 
+        featureMapForTeacherArr = getFeatureMaps(teacher_model, device, image)
+        featureMapForStudentArr = getFeatureMaps(student_model, device, image)
+
         for i in range(0, (len(featureMapNumForStudentArr))):
 
-            featureMapNumForStudent = featureMapNumForStudentArr[i]
-            featureMapNumForTeacher = featureMapNumForTeacherArr[i]
+            featureMapNumForStudent = featureMapNumForStudentArr[0]
+            featureMapNumForTeacher = featureMapNumForTeacherArr[0]
 
-            featureMapForTeacher = getFeatureMaps(teacher_model, device, image)[featureMapNumForTeacher]
-            featureMapForStudent = getFeatureMaps(student_model, device, image)[featureMapNumForStudent]
+            featureMapForTeacher = featureMapForTeacherArr[featureMapNumForTeacher]
+            featureMapForStudent = featureMapForStudentArr[featureMapNumForStudent]
 
             # Normalize tensor so NaN values do not get produced by loss function
             t = normalize(featureMapForTeacher, p=1.0, dim=2)
