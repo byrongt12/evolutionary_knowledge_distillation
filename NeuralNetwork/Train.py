@@ -232,24 +232,20 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
 
         for batch in train_dl:
 
-            if batch_count == numOfBatches:
-                break
+            if batch_count <= numOfBatches:
+                kd_loss_arr = distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer,
+                                      distill_lr,
+                                      batch,
+                                      student_model,
+                                      student_model_number, teacher_model, teacher_model_number, device, lossOnly=True)
 
-            batch_count += 1
+                for kd_loss in kd_loss_arr:
+                    kd_loss.backward(retain_graph=True)
 
-            kd_loss_arr = distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer,
-                                  distill_lr,
-                                  batch,
-                                  student_model,
-                                  student_model_number, teacher_model, teacher_model_number, device, lossOnly=True)
+                distill_optimizer_implemented.step()
 
-            for kd_loss in kd_loss_arr:
-                kd_loss.backward(retain_graph=True)
-
-            distill_optimizer_implemented.step()
-
-            for param in student_model.parameters():  # instead of: optimizer.zero_grad()
-                param.grad = None
+                for param in student_model.parameters():  # instead of: optimizer.zero_grad()
+                    param.grad = None
 
             # Normal error and update
             loss, acc = student_model.training_step(batch)
@@ -266,11 +262,7 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
             for param in student_model.parameters():  # instead of: optimizer.zero_grad()
                 param.grad = None
 
-        # Add results:
-        result = evaluate(student_model, test_dl)
-        result["train_loss"] = torch.stack(train_loss).mean().item()
-        result["train_acc"] = torch.stack(train_acc).mean().item()
-        history.append(result)
+            batch_count += 1
 
     return history
 
@@ -297,24 +289,20 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
 
         for batch in train_dl:
 
-            if batch_count == 20:   # HERE: Because new distill on all images in batch takes long.
-                break
+            if batch_count <= 2:
+                kd_loss_arr = distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer,
+                                      distill_lr,
+                                      batch,
+                                      student_model,
+                                      student_model_number, teacher_model, teacher_model_number, device, lossOnly=True)
 
-            batch_count += 1
+                for kd_loss in kd_loss_arr:
+                    kd_loss.backward(retain_graph=True)
 
-            kd_loss_arr = distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer,
-                                  distill_lr,
-                                  batch,
-                                  student_model,
-                                  student_model_number, teacher_model, teacher_model_number, device, lossOnly=True)
+                distill_optimizer_implemented.step()
 
-            for kd_loss in kd_loss_arr:
-                kd_loss.backward(retain_graph=True)
-
-            distill_optimizer_implemented.step()
-
-            for param in student_model.parameters():  # instead of: optimizer.zero_grad()
-                param.grad = None
+                for param in student_model.parameters():  # instead of: optimizer.zero_grad()
+                    param.grad = None
 
             # Normal error and update
             loss, acc = student_model.training_step(batch)
@@ -334,6 +322,8 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
             # Step scheduler
             scheduler.step()
             lrs.append(get_lr(optimizer))
+
+            batch_count += 1
 
         # Add results:
         result = evaluate(student_model, test_dl)
