@@ -291,7 +291,7 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
 
         for batch in train_dl:
 
-            if batch_count <= 10:
+            if batch_count <= 15:
                 kd_loss_arr = distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer,
                                       distill_lr,
                                       batch,
