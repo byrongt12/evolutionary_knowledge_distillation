@@ -7,7 +7,6 @@ import torchvision.transforms as transforms
 from torchmetrics.functional import pairwise_euclidean_distance
 from torch.nn.functional import normalize
 
-
 def printLayerAndGradientBoolean(student_model):
     model_children = list(student_model.children())
     counter = 0
@@ -261,10 +260,13 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, dist
             featureMapForStudent = featureMapForStudentArr[featureMapNumForStudent]
 
             # Normalize tensor so NaN values do not get produced by loss function
-            t = normalize(featureMapForTeacher, p=1.0, dim=2)
-            t = normalize(t, p=1.0, dim=3)
-            s = normalize(featureMapForStudent, p=1.0, dim=2)
-            s = normalize(s, p=1.0, dim=3)
+            v_min, v_max = featureMapForTeacher.min(), featureMapForTeacher.max()
+            new_min, new_max = -1, 1
+            t = (featureMapForTeacher - v_min) / (v_max - v_min) * (new_max - new_min) + new_min
+
+            v_min, v_max = featureMapForStudent.min(), featureMapForStudent.max()
+            new_min, new_max = -1, 1
+            s = (featureMapForStudent - v_min) / (v_max - v_min) * (new_max - new_min) + new_min
 
             # Loss functions: Cosine, SSIM, PSNR and Euclidean dist
             distill_loss = 0
@@ -347,10 +349,14 @@ def distill56(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, di
             featureMapForStudent = featureMapForStudentArr[featureMapNumForStudent]
 
             # Normalize tensor so NaN values do not get produced by loss function
-            t = normalize(featureMapForTeacher, p=1.0, dim=2)
-            t = normalize(t, p=1.0, dim=3)
-            s = normalize(featureMapForStudent, p=1.0, dim=2)
-            s = normalize(s, p=1.0, dim=3)
+
+            v_min, v_max = featureMapForTeacher.min(), featureMapForTeacher.max()
+            new_min, new_max = -1, 1
+            t = (featureMapForTeacher - v_min) / (v_max - v_min) * (new_max - new_min) + new_min
+
+            v_min, v_max = featureMapForStudent.min(), featureMapForStudent.max()
+            new_min, new_max = -1, 1
+            s = (featureMapForStudent - v_min) / (v_max - v_min) * (new_max - new_min) + new_min
 
             # Loss functions: Cosine, SSIM, PSNR and Euclidean dist
             distill_loss = 0
