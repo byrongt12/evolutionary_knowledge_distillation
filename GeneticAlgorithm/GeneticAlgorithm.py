@@ -587,7 +587,6 @@ class GeneticAlgorithm(object):
                 print(getFeatureMaps(student_model, device, image))
                 exit()'''
 
-
         trainingItems = [heuristicToLayerDict, epochs, train_dl, test_dl, student_model,
                          student_model_number,
                          teacher_model, teacher_model_number, device, optimizer, max_lr, weight_decay, scheduler,
