@@ -550,7 +550,7 @@ class GeneticAlgorithm(object):
         kd_loss_type = trainingParameters[11]
         heuristicToLayerDict = trainingParameters[12]
 
-        # Save old student weights to a file:
+        '''# Save old student weights to a file:
         torch.save(student_model.state_dict(), "../../../NeuralNetwork/resnet20_initial.ckpt")
 
         # Train student for x epoch(s) and save its weights to a file:
@@ -562,6 +562,21 @@ class GeneticAlgorithm(object):
                                           grad_clip)
 
             torch.save(student_model.state_dict(), "../../../NeuralNetwork/resnet20_initialized_10_epochs.ckpt")
+        else:
+            print("Partially trained student model found.")'''
+
+        # Save old student weights to a file:
+        torch.save(student_model.state_dict(), "../../../NeuralNetwork/resnet56_initial.ckpt")
+
+        # Train student for x epoch(s) and save its weights to a file:
+        student_initialized_chk_path = "../../../NeuralNetwork/resnet56_initialized_10_epochs.ckpt"
+        if not path.exists(student_initialized_chk_path):
+            print("Training student model before distillation experimentation...")
+            student_model = train_student(student_model, 10, train_dl, test_dl, optimizer, 0.01, weight_decay,
+                                          scheduler,
+                                          grad_clip)
+
+            torch.save(student_model.state_dict(), "../../../NeuralNetwork/resnet56_initialized_10_epochs.ckpt")
         else:
             print("Partially trained student model found.")
 

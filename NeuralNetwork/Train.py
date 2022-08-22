@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from NeuralNetwork.Helper import distill
+from NeuralNetwork.Helper import distill, distill56
 
 # Speed up training
 torch.autograd.set_detect_anomaly(False)
@@ -235,11 +235,11 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
             if batch_count == numOfBatches:
                 break
 
-            kd_loss_arr = distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer,
-                                  distill_lr,
-                                  batch,
-                                  student_model,
-                                  student_model_number, teacher_model, teacher_model_number, device, lossOnly=True)
+            kd_loss_arr = distill56(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer,
+                                    distill_lr,
+                                    batch,
+                                    student_model,
+                                    student_model_number, teacher_model, teacher_model_number, device, lossOnly=True)
 
             for kd_loss in kd_loss_arr:
                 kd_loss.backward(retain_graph=True)
@@ -292,11 +292,13 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
         for batch in train_dl:
 
             if batch_count <= 15:
-                kd_loss_arr = distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer,
-                                      distill_lr,
-                                      batch,
-                                      student_model,
-                                      student_model_number, teacher_model, teacher_model_number, device, lossOnly=True)
+                kd_loss_arr = distill56(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer,
+                                        distill_optimizer,
+                                        distill_lr,
+                                        batch,
+                                        student_model,
+                                        student_model_number, teacher_model, teacher_model_number, device,
+                                        lossOnly=True)
 
                 for kd_loss in kd_loss_arr:
                     kd_loss.backward(retain_graph=True)

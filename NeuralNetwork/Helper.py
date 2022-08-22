@@ -192,33 +192,6 @@ def differentSizeMaps(featureMapForTeacher, featureMapForStudent):
 
     return A, B
 
-
-def creatParametersList(student_model, layerForStudent, blockForStudent, convForStudent):
-    params = []
-    # Add all the layers from the start until current layer
-    for i in range(1, layerForStudent):
-        executeStr = 'list(student_model.layer' + str(i) + '.parameters())'
-        params += eval(executeStr)
-
-    for j in range(1, blockForStudent):
-        for x in range(1, 3):
-            executeStr = 'list(student_model.layer' + str(layerForStudent) + '[' + str(j - 1) + '].conv' + str(
-                x) + '.parameters())'
-            params += eval(executeStr)
-
-    for k in range(1, convForStudent):
-        executeStr = 'list(student_model.layer' + str(layerForStudent) + '[' + str(
-            blockForStudent - 1) + '].conv' + str(k) + '.parameters())'
-        params += eval(executeStr)
-
-    # Add current layer parameters
-    executeStr = 'list(student_model.layer' + str(layerForStudent) + '[' + str(blockForStudent - 1) + '].conv' + str(
-        convForStudent) + '.parameters())'
-    params += eval(executeStr)
-
-    return params
-
-
 def getRandomBatches(numOfBatches, dataLoader):
     randomBatches = []
 
@@ -303,11 +276,92 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, dist
                 distill_loss = F.cosine_similarity(s.reshape(1, -1), t.reshape(1, -1))
             elif kd_loss_type == 'euclidean':
                 distill_loss = pairwise_euclidean_distance(s.reshape(1, -1), t.reshape(1, -1))
-            elif kd_loss_type == 'mse':
-                loss = nn.MSELoss(reduction='none')
-                distill_loss = torch.sum(loss(featureMapForStudent, featureMapForTeacher), dim=0)
-                distill_loss = torch.sum(distill_loss, dim=1)
-                distill_loss = torch.sum(distill_loss)
+
+            kd_loss_arr.append(distill_loss)
+
+    if not lossOnly:
+        for kd_loss in kd_loss_arr:
+            kd_loss.backward(retain_graph=True)
+
+        distill_optimizer_implemented.step()
+
+        for param in student_model.parameters():  # instead of: optimizer.zero_grad()
+            param.grad = None
+
+    return kd_loss_arr
+
+
+def distill56(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer, distill_lr, batch,
+              student_model,
+              student_model_number, teacher_model, teacher_model_number, device, lossOnly=False):
+    student_model.train()  # put the model in train mode
+
+    kd_loss_arr = []
+    featureMapNumForStudentArr = []
+    featureMapNumForTeacherArr = []
+    distill_optimizer_implemented = distill_optimizer(student_model.parameters(), lr=distill_lr)
+
+    for i in range(0, len(heuristicString)):
+        if (i + 1) % 2 != 0:
+            # student layer
+            student_layer_number = heuristicToLayerDict[heuristicString[i]]
+            featureMapNumForStudentArr.append(student_layer_number)
+        else:
+            # teacher layer
+            layerForStudent, blockForStudent, convForStudent = convertLayerToCode(student_model_number,
+                                                                                  student_layer_number)
+            layerForTeacher = layerForStudent
+            # 1 - 36
+            OldRange = (56 - 1)
+            NewRange = (36 - 1)
+            newValue = (((heuristicToLayerDict[heuristicString[i]] - 1) * NewRange) / OldRange) + 1
+
+            teacher_layer_number = ((layerForTeacher - 1) * teacher_model_number * 2) + int(newValue)
+
+            featureMapNumForTeacherArr.append(teacher_layer_number)
+
+    if len(heuristicString) % 2 != 0:
+        # featureMapNumForStudentArr > featureMapNumForTeacherArr, so add teacher layer
+        layerForStudent, blockForStudent, convForStudent = convertLayerToCode(student_model_number,
+                                                                              featureMapNumForStudentArr[-1])
+
+        layerForTeacher = layerForStudent
+
+        teacher_layer_number = ((layerForTeacher - 1) * teacher_model_number * 2) + (2 * teacher_model_number)
+
+        featureMapNumForTeacherArr.append(teacher_layer_number)
+
+    images, labels = batch
+
+    for image in images:
+
+        featureMapForTeacherArr = getFeatureMaps(teacher_model, device, image)
+        featureMapForStudentArr = getFeatureMaps(student_model, device, image)
+
+        for i in range(0, (len(featureMapNumForStudentArr))):
+
+            featureMapNumForStudent = featureMapNumForStudentArr[0]
+            featureMapNumForTeacher = featureMapNumForTeacherArr[0]
+
+            featureMapForTeacher = featureMapForTeacherArr[featureMapNumForTeacher]
+            featureMapForStudent = featureMapForStudentArr[featureMapNumForStudent]
+
+            # Normalize tensor so NaN values do not get produced by loss function
+            t = normalize(featureMapForTeacher, p=1.0, dim=2)
+            t = normalize(t, p=1.0, dim=3)
+            s = normalize(featureMapForStudent, p=1.0, dim=2)
+            s = normalize(s, p=1.0, dim=3)
+
+            # Loss functions: Cosine, SSIM, PSNR and Euclidean dist
+            distill_loss = 0
+            if kd_loss_type == 'ssim':
+                distill_loss = -1 * ssim_loss(s, t, max_val=2.0, window_size=1)
+            elif kd_loss_type == 'psnr':
+                distill_loss = psnr_loss(s, t, max_val=1.0)
+            elif kd_loss_type == 'cosine':  # best
+                distill_loss = F.cosine_similarity(s.reshape(1, -1), t.reshape(1, -1))
+            elif kd_loss_type == 'euclidean':
+                distill_loss = pairwise_euclidean_distance(s.reshape(1, -1), t.reshape(1, -1))
 
             kd_loss_arr.append(distill_loss)
 
