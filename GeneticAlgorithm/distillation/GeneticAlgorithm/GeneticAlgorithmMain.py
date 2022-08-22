@@ -26,10 +26,10 @@ class GeneticAlgorithmMain(object):
         # This method illustrates how the selection construction hyper-heuristic in
         # the GeneticAlgorithm library can be used to solve a combinatorial optimization problem.
         # abcdefghijklmnopqrstuvwxyz1234567890
-        # abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234
+        # abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ12
         problem = DistillationProblem()
         seed = round(time.time() * 1000)
-        heuristics = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234"
+        heuristics = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ12"
         genetic_algorithm = GeneticAlgorithm(seed, heuristics)
         genetic_algorithm.set_parameters("Parameters.txt")
         genetic_algorithm.set_problem(problem)
@@ -43,7 +43,7 @@ class GeneticAlgorithmMain(object):
         optimizer = torch.optim.Adam
         scheduler = torch.optim.lr_scheduler.OneCycleLR
         max_lr = 0.01
-        grad_clip = 0
+        grad_clip = 0.1
         weight_decay = 0
 
         distill_optimizer = torch.optim.Adam
@@ -144,8 +144,6 @@ class GeneticAlgorithmMain(object):
             'Z': 52,
             '1': 53,
             '2': 54,
-            '3': 55,
-            '4': 56,
         }
 
         print("Hyper parameters:")

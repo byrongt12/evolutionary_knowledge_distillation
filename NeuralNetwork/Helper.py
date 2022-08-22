@@ -254,8 +254,8 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, dist
 
         for i in range(0, (len(featureMapNumForStudentArr))):
 
-            featureMapNumForStudent = featureMapNumForStudentArr[0]
-            featureMapNumForTeacher = featureMapNumForTeacherArr[0]
+            featureMapNumForStudent = featureMapNumForStudentArr[i]
+            featureMapNumForTeacher = featureMapNumForTeacherArr[i]
 
             featureMapForTeacher = featureMapForTeacherArr[featureMapNumForTeacher]
             featureMapForStudent = featureMapForStudentArr[featureMapNumForStudent]
@@ -340,8 +340,8 @@ def distill56(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, di
 
         for i in range(0, (len(featureMapNumForStudentArr))):
 
-            featureMapNumForStudent = featureMapNumForStudentArr[0]
-            featureMapNumForTeacher = featureMapNumForTeacherArr[0]
+            featureMapNumForStudent = featureMapNumForStudentArr[i]
+            featureMapNumForTeacher = featureMapNumForTeacherArr[i]
 
             featureMapForTeacher = featureMapForTeacherArr[featureMapNumForTeacher]
             featureMapForStudent = featureMapForStudentArr[featureMapNumForStudent]

@@ -81,7 +81,7 @@ def printFeatureMaps(model, device, train_loader):
         imgplot = plt.imshow(processed[i])
         a.axis("off")
         a.set_title(names[i].split('(')[0], fontsize=30)
-    plt.savefig(str('print/feature_maps.jpg'), bbox_inches='tight')
+    plt.savefig(str('feature_maps.jpg'), bbox_inches='tight')
     print("Feature maps printed.")
 
 

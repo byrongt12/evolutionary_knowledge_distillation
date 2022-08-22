@@ -24,12 +24,12 @@ from torchvision.datasets import CIFAR100
 
 from os import path
 
-from NeuralNetwork.Helper import weights_init
+from NeuralNetwork.Helper import weights_init, getFeatureMaps
 from NeuralNetwork.Train import train_student, train_model_distill_only
 from NeuralNetwork.ResNet import ResNet
 from NeuralNetwork.ResidualBlock import ResidualBlock
 from NeuralNetwork.Train import train_model, evaluate, train_model_with_distillation
-from NeuralNetwork.Print import plot_acc, plot_loss
+from NeuralNetwork.Print import plot_acc, plot_loss, printFeatureMaps
 
 
 class GeneticAlgorithm(object):
@@ -580,6 +580,14 @@ class GeneticAlgorithm(object):
         else:
             print("Partially trained student model found.")
 
+        '''student_model.load_state_dict(torch.load(student_initialized_chk_path))
+        for batch in train_dl:
+            images, label = batch
+            for image in images:
+                print(getFeatureMaps(student_model, device, image))
+                exit()'''
+
+
         trainingItems = [heuristicToLayerDict, epochs, train_dl, test_dl, student_model,
                          student_model_number,
                          teacher_model, teacher_model_number, device, optimizer, max_lr, weight_decay, scheduler,
@@ -609,7 +617,7 @@ class GeneticAlgorithm(object):
         print("Completed evolving heuristic combination")
         print("Now training with heuristic combination...")
 
-        student_init_chk_path = "../../../NeuralNetwork/resnet20_initialized_80_epochs.ckpt"
+        student_init_chk_path = "../../../NeuralNetwork/resnet56_initialized_10_epochs.ckpt"
         if path.exists(student_init_chk_path):
             student_model.load_state_dict(torch.load(student_init_chk_path))
         else:
