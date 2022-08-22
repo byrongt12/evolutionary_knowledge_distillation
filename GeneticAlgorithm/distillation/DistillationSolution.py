@@ -99,7 +99,7 @@ class DistillationSolution(Solution):
 
         torch.cuda.empty_cache()
 
-        train_model_partial_with_distillation(self.heuristic_combination, heuristicToLayerDict, 1, 10, train_dl,
+        train_model_partial_with_distillation(self.heuristic_combination, heuristicToLayerDict, 1, 1, train_dl,
                                               test_dl,
                                               student_model,
                                               student_model_number, teacher_model,

@@ -47,7 +47,7 @@ class GeneticAlgorithmMain(object):
         weight_decay = 0
 
         distill_optimizer = torch.optim.Adam
-        distill_lr = 0.001
+        distill_lr = 0.003
         kd_loss_type = 'cosine'
 
         heuristicToLayerDict = {
