@@ -580,12 +580,12 @@ class GeneticAlgorithm(object):
         else:
             print("Partially trained student model found.")
 
-        student_model.load_state_dict(torch.load(student_initialized_chk_path))
+        '''student_model.load_state_dict(torch.load(student_initialized_chk_path))
         for batch in train_dl:
             images, label = batch
             for image in images:
                 print(getFeatureMaps(student_model, device, image))
-                exit()
+                exit()'''
 
         trainingItems = [heuristicToLayerDict, epochs, train_dl, test_dl, student_model,
                          student_model_number,
