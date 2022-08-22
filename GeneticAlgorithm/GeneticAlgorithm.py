@@ -572,7 +572,7 @@ class GeneticAlgorithm(object):
         student_initialized_chk_path = "../../../NeuralNetwork/resnet56_initialized_10_epochs.ckpt"
         if not path.exists(student_initialized_chk_path):
             print("Training student model before distillation experimentation...")
-            student_model = train_student(student_model, 10, train_dl, test_dl, optimizer, 0.01, weight_decay,
+            student_model = train_student(student_model, 10, train_dl, test_dl, optimizer, 0.00125, weight_decay,
                                           scheduler,
                                           grad_clip)
 
@@ -580,12 +580,12 @@ class GeneticAlgorithm(object):
         else:
             print("Partially trained student model found.")
 
-        '''student_model.load_state_dict(torch.load(student_initialized_chk_path))
+        student_model.load_state_dict(torch.load(student_initialized_chk_path))
         for batch in train_dl:
             images, label = batch
             for image in images:
                 print(getFeatureMaps(student_model, device, image))
-                exit()'''
+                exit()
 
         trainingItems = [heuristicToLayerDict, epochs, train_dl, test_dl, student_model,
                          student_model_number,
