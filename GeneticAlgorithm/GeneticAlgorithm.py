@@ -557,7 +557,7 @@ class GeneticAlgorithm(object):
         student_initialized_chk_path = "../../../NeuralNetwork/resnet20_initialized_10_epochs.ckpt"
         if not path.exists(student_initialized_chk_path):
             print("Training student model before distillation experimentation...")
-            student_model = train_student(student_model, 10, train_dl, test_dl, optimizer, 0.01, weight_decay,
+            student_model = train_student(student_model, 10, train_dl, test_dl, optimizer, max_lr, weight_decay,
                                           scheduler,
                                           grad_clip)
 
@@ -572,7 +572,7 @@ class GeneticAlgorithm(object):
         student_initialized_chk_path = "../../../NeuralNetwork/resnet56_initialized_10_epochs.ckpt"
         if not path.exists(student_initialized_chk_path):
             print("Training student model before distillation experimentation...")
-            student_model = train_student(student_model, 10, train_dl, test_dl, optimizer, 0.003, weight_decay,
+            student_model = train_student(student_model, 10, train_dl, test_dl, optimizer, max_lr, weight_decay,
                                           scheduler,
                                           grad_clip)
 

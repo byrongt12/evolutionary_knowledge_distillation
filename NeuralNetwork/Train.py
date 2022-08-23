@@ -285,8 +285,12 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
     history = []
 
     optimizer = optimizer(student_model.parameters(), max_lr, weight_decay=weight_decay)
-    scheduler = scheduler(optimizer, max_lr, epochs=epochs, steps_per_epoch=len(train_dl))
+    scheduler = scheduler(optimizer, max_lr=max_lr, epochs=epochs, steps_per_epoch=len(train_dl), last_epoch=-1)
     distill_optimizer_implemented = distill_optimizer(student_model.parameters(), lr=distill_lr)
+
+    for _ in range(10):
+        # Step scheduler in dummy loop
+        scheduler.step()
 
     for epoch in range(epochs):
         student_model.train()  # put the model in train mode
@@ -310,10 +314,10 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
                 for kd_loss in kd_loss_arr:
                     kd_loss.backward(retain_graph=True)
 
-                distill_optimizer_implemented.step()
+                '''distill_optimizer_implemented.step()
 
                 for param in student_model.parameters():  # instead of: optimizer.zero_grad()
-                    param.grad = None
+                    param.grad = None'''
 
             # Normal error and update
             loss, acc = student_model.training_step(batch)
