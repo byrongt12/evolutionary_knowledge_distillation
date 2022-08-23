@@ -209,7 +209,8 @@ def train_model_distill_only(numOfBatches, heuristicString, heuristicToLayerDict
             break
 
 
-def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict, epochs, numOfBatches, train_dl,
+def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict, epochs, numOfBatches,
+                                          numOfBatchesToDistill, train_dl,
                                           test_dl,
                                           student_model,
                                           student_model_number, teacher_model,
@@ -222,6 +223,7 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
 
     optimizer = optimizer(student_model.parameters(), max_lr, weight_decay=weight_decay)
     distill_optimizer_implemented = distill_optimizer(student_model.parameters(), lr=distill_lr)
+    distill_batch_arr = []
 
     for epoch in range(epochs):
         student_model.train()  # put the model in train mode
@@ -232,12 +234,17 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
 
         for batch in train_dl:
 
+            if batch_count < numOfBatchesToDistill:
+                distill_batch_arr.append(batch)
+
+            distill_batch = distill_batch_arr[batch_count % numOfBatchesToDistill]
+
             if batch_count == numOfBatches:
                 break
 
             kd_loss_arr = distill56(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer,
                                     distill_lr,
-                                    batch,
+                                    distill_batch,
                                     student_model,
                                     student_model_number, teacher_model, teacher_model_number, device, lossOnly=True)
 
@@ -249,7 +256,7 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
             for param in student_model.parameters():  # instead of: optimizer.zero_grad()
                 param.grad = None
 
-            '''# Normal error and update
+            # Normal error and update
             loss, acc = student_model.training_step(batch)
             train_loss.append(loss)
             train_acc.append(acc)
@@ -259,17 +266,17 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
             if grad_clip:
                 nn.utils.clip_grad_value_(student_model.parameters(), grad_clip)
 
-            optimizer.step()
+            distill_optimizer_implemented.step()
 
             for param in student_model.parameters():  # instead of: optimizer.zero_grad()
-                param.grad = None'''
+                param.grad = None
 
             batch_count += 1
 
-    return history
+    return distill_batch_arr
 
 
-def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs, train_dl, test_dl, student_model,
+def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs, distill_batch_arr, numOfBatchesToDistill, train_dl, test_dl, student_model,
                                   student_model_number, teacher_model,
                                   teacher_model_number, device, optimizer, max_lr,
                                   weight_decay, scheduler, kd_loss_type, distill_optimizer,
@@ -291,11 +298,12 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
 
         for batch in train_dl:
 
-            if batch_count <= 15:
+            if batch_count <= numOfBatchesToDistill:
+                distill_batch = distill_batch_arr[batch_count % numOfBatchesToDistill]
                 kd_loss_arr = distill56(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer,
                                         distill_optimizer,
                                         distill_lr,
-                                        batch,
+                                        distill_batch,
                                         student_model,
                                         student_model_number, teacher_model, teacher_model_number, device,
                                         lossOnly=True)

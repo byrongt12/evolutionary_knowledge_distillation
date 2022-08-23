@@ -624,7 +624,7 @@ class GeneticAlgorithm(object):
             exit()
 
         history = [evaluate(student_model, test_dl)]
-        history += train_model_with_distillation(best.get_heuristic_combination(), heuristicToLayerDict, epochs,
+        history += train_model_with_distillation(best.get_heuristic_combination(), heuristicToLayerDict, epochs, best.get_batches(), 2,
                                                  train_dl,
                                                  test_dl, student_model, student_model_number, teacher_model,
                                                  teacher_model_number,

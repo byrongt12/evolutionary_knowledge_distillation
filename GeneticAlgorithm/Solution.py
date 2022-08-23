@@ -13,3 +13,6 @@ class Solution:
 
     def get_heuristic_combination(self) -> str:
         pass
+
+    def get_batches(self):
+        pass

@@ -32,6 +32,12 @@ class DistillationSolution(Solution):
     # could be a string representing the tour.
     initial_solution: List[str] = []
 
+    # Batch of images used for distillation
+    batches = None
+
+    def get_batches(self):
+        return self.batches
+
     # It may be necessary to store other values that are specific to problem being
     # solved that is different from the fitness or needed to calculate the fitness.
     # For example, for the examination timetabling problem the hard and soft
@@ -99,13 +105,16 @@ class DistillationSolution(Solution):
 
         torch.cuda.empty_cache()
 
-        train_model_partial_with_distillation(self.heuristic_combination, heuristicToLayerDict, 1, 10, train_dl,
-                                              test_dl,
-                                              student_model,
-                                              student_model_number, teacher_model,
-                                              teacher_model_number, device, optimizer, max_lr,
-                                              weight_decay, scheduler, kd_loss_type, distill_optimizer,
-                                              distill_lr)
+        distill_batch_arr = train_model_partial_with_distillation(self.heuristic_combination, heuristicToLayerDict, 1,
+                                                                  2, 2,
+                                                                  train_dl,
+                                                                  test_dl,
+                                                                  student_model,
+                                                                  student_model_number, teacher_model,
+                                                                  teacher_model_number, device, optimizer, max_lr,
+                                                                  weight_decay, scheduler, kd_loss_type,
+                                                                  distill_optimizer,
+                                                                  distill_lr)
 
         result = evaluate(student_model, test_dl)
 
@@ -113,4 +122,5 @@ class DistillationSolution(Solution):
 
         print(fitness)
 
+        self.batches = distill_batch_arr
         self.fitness = fitness
