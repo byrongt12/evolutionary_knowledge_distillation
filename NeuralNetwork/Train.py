@@ -286,7 +286,7 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
     history = []
 
     optimizer = optimizer(student_model.parameters(), max_lr, weight_decay=weight_decay)
-    scheduler = scheduler(optimizer, max_lr=max_lr, epochs=epochs, steps_per_epoch=len(train_dl), last_epoch=-1)
+    scheduler = scheduler(optimizer, max_lr=max_lr, epochs=80, steps_per_epoch=len(train_dl), last_epoch=-1)
     distill_optimizer_implemented = distill_optimizer(student_model.parameters(), lr=distill_lr)
 
     for _ in range(5000):
