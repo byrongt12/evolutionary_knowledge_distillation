@@ -275,7 +275,8 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
     return distill_batch_arr
 
 
-def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs, distill_batch_arr, numOfBatchesToDistill, train_dl, test_dl, student_model,
+def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs, distill_batch_arr,
+                                  numOfBatchesToDistill, train_dl, test_dl, student_model,
                                   student_model_number, teacher_model,
                                   teacher_model_number, device, optimizer, max_lr,
                                   weight_decay, scheduler, kd_loss_type, distill_optimizer,
@@ -288,8 +289,7 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
     scheduler = scheduler(optimizer, max_lr=max_lr, epochs=epochs, steps_per_epoch=len(train_dl), last_epoch=-1)
     distill_optimizer_implemented = distill_optimizer(student_model.parameters(), lr=distill_lr)
 
-    for _ in range(10):
-        # Step scheduler in dummy loop
+    for _ in range(5000):
         scheduler.step()
 
     for epoch in range(epochs):
