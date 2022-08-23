@@ -565,8 +565,15 @@ class GeneticAlgorithm(object):
         else:
             print("Partially trained student model found.")'''
 
-        # Save old student weights to a file:
-        torch.save(student_model.state_dict(), "../../../NeuralNetwork/resnet56_initial.ckpt")
+        '''# Save old student weights to a file:
+        torch.save(student_model.state_dict(), "../../../NeuralNetwork/resnet56_initial.ckpt")'''
+
+        '''student_model.load_state_dict(torch.load(student_initialized_chk_path))
+                for batch in train_dl:
+                    images, label = batch
+                    for image in images:
+                        print(getFeatureMaps(student_model, device, image))
+                        exit()'''
 
         # Train student for x epoch(s) and save its weights to a file:
         student_initialized_chk_path = "../../../NeuralNetwork/resnet56_initialized_10_epochs.ckpt"
@@ -579,13 +586,6 @@ class GeneticAlgorithm(object):
             torch.save(student_model.state_dict(), "../../../NeuralNetwork/resnet56_initialized_10_epochs.ckpt")
         else:
             print("Partially trained student model found.")
-
-        '''student_model.load_state_dict(torch.load(student_initialized_chk_path))
-        for batch in train_dl:
-            images, label = batch
-            for image in images:
-                print(getFeatureMaps(student_model, device, image))
-                exit()'''
 
         trainingItems = [heuristicToLayerDict, epochs, train_dl, test_dl, student_model,
                          student_model_number,
@@ -624,7 +624,8 @@ class GeneticAlgorithm(object):
             exit()
 
         history = [evaluate(student_model, test_dl)]
-        history += train_model_with_distillation(best.get_heuristic_combination(), heuristicToLayerDict, epochs, best.get_batches(), 2,
+        history += train_model_with_distillation(best.get_heuristic_combination(), heuristicToLayerDict, epochs,
+                                                 best.get_batches(), 2,
                                                  train_dl,
                                                  test_dl, student_model, student_model_number, teacher_model,
                                                  teacher_model_number,
