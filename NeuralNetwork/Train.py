@@ -219,9 +219,8 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
                                           distill_lr,
                                           grad_clip=None):
     torch.cuda.empty_cache()
-    history = []
 
-    optimizer = optimizer(student_model.parameters(), max_lr, weight_decay=weight_decay)
+    optimizer = torch.optim.SGD(student_model.parameters(), 0.0001)
     distill_optimizer_implemented = distill_optimizer(student_model.parameters(), lr=distill_lr)
     distill_batch_arr = []
 
@@ -266,7 +265,7 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
             if grad_clip:
                 nn.utils.clip_grad_value_(student_model.parameters(), grad_clip)
 
-            distill_optimizer_implemented.step()
+            optimizer.step()
 
             for param in student_model.parameters():  # instead of: optimizer.zero_grad()
                 param.grad = None
@@ -299,7 +298,7 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
         for batch in train_dl:
 
             if batch_count <= numOfBatchesToDistill:
-                distill_batch = distill_batch_arr[batch_count % numOfBatchesToDistill]
+                distill_batch = distill_batch_arr[batch_count % len(distill_batch_arr)]
                 kd_loss_arr = distill56(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer,
                                         distill_optimizer,
                                         distill_lr,
