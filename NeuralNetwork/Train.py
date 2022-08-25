@@ -301,23 +301,23 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
 
         for batch in train_dl:
 
-            # if batch_count <= numOfBatchesToDistill:
-            #     distill_batch = distill_batch_arr[batch_count % len(distill_batch_arr)]
-            #     kd_loss_arr = distill56(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer,
-            #                             distill_optimizer,
-            #                             distill_lr,
-            #                             distill_batch,
-            #                             student_model,
-            #                             student_model_number, teacher_model, teacher_model_number, device,
-            #                             lossOnly=True)
-            #
-            #     for kd_loss in kd_loss_arr:
-            #         kd_loss.backward(retain_graph=True)
-            #
-            #     distill_optimizer_implemented.step()
-            #
-            #     for param in student_model.parameters():  # instead of: optimizer.zero_grad()
-            #         param.grad = None
+            if batch_count <= numOfBatchesToDistill:
+                distill_batch = distill_batch_arr[batch_count % len(distill_batch_arr)]
+                kd_loss_arr = distill56(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer,
+                                        distill_optimizer,
+                                        distill_lr,
+                                        distill_batch,
+                                        student_model,
+                                        student_model_number, teacher_model, teacher_model_number, device,
+                                        lossOnly=True)
+
+                for kd_loss in kd_loss_arr:
+                    kd_loss.backward(retain_graph=True)
+
+                distill_optimizer_implemented.step()
+
+                for param in student_model.parameters():  # instead of: optimizer.zero_grad()
+                    param.grad = None
 
             # Normal error and update
             loss, acc = student_model.training_step(batch)
