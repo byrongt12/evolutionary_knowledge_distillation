@@ -42,7 +42,7 @@ class GeneticAlgorithmMain(object):
 
         optimizer = torch.optim.Adam
         scheduler = torch.optim.lr_scheduler.OneCycleLR
-        max_lr = 0.0025
+        max_lr = 0.003
         grad_clip = 0.1
         weight_decay = 0
 

@@ -314,6 +314,9 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
                 for kd_loss in kd_loss_arr:
                     kd_loss.backward(retain_graph=True)
 
+                if grad_clip:
+                    nn.utils.clip_grad_value_(student_model.parameters(), grad_clip)
+
                 distill_optimizer_implemented.step()
 
                 for param in student_model.parameters():  # instead of: optimizer.zero_grad()
