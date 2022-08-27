@@ -549,6 +549,9 @@ class GeneticAlgorithm(object):
         scheduler = trainingParameters[10]
         kd_loss_type = trainingParameters[11]
         heuristicToLayerDict = trainingParameters[12]
+        numOfBatchesToDistill = trainingParameters[13]
+        initial_epochs = trainingParameters[14]
+        total_epochs =  trainingParameters[15]
 
         '''# Save old student weights to a file:
         torch.save(student_model.state_dict(), "../../../NeuralNetwork/resnet20_initial.ckpt")
@@ -576,21 +579,21 @@ class GeneticAlgorithm(object):
                         exit()'''
 
         # Train student for x epoch(s) and save its weights to a file:
-        student_initialized_chk_path = "../../../NeuralNetwork/resnet56_initialized_10_epochs.ckpt"
+        student_initialized_chk_path = "../../../NeuralNetwork/resnet56_initialized_" + str(initial_epochs) + "_epochs.ckpt"
         if not path.exists(student_initialized_chk_path):
             print("Training student model before distillation experimentation...")
-            student_model = train_student(student_model, 10, train_dl, test_dl, optimizer, max_lr, weight_decay,
+            student_model = train_student(student_model, initial_epochs, total_epochs, train_dl, test_dl, optimizer, max_lr, weight_decay,
                                           scheduler,
                                           grad_clip)
 
-            torch.save(student_model.state_dict(), "../../../NeuralNetwork/resnet56_initialized_10_epochs.ckpt")
+            torch.save(student_model.state_dict(), "../../../NeuralNetwork/resnet56_initialized_" + str(initial_epochs) + "_epochs.ckpt")
         else:
             print("Partially trained student model found.")
 
         trainingItems = [heuristicToLayerDict, epochs, train_dl, test_dl, student_model,
                          student_model_number,
                          teacher_model, teacher_model_number, device, optimizer, max_lr, weight_decay, scheduler,
-                         kd_loss_type, distill_optimizer, distill_lr, grad_clip]
+                         kd_loss_type, distill_optimizer, distill_lr, grad_clip, initial_epochs]
 
         if self.print_:
             print("Generation 0")
@@ -616,7 +619,7 @@ class GeneticAlgorithm(object):
         print("Completed evolving heuristic combination")
         print("Now training with heuristic combination...")
 
-        student_init_chk_path = "../../../NeuralNetwork/resnet56_initialized_10_epochs.ckpt"
+        student_init_chk_path = "../../../NeuralNetwork/resnet56_initialized_" + str(initial_epochs) + "_epochs.ckpt"
         if path.exists(student_init_chk_path):
             student_model.load_state_dict(torch.load(student_init_chk_path))
         else:
@@ -624,8 +627,8 @@ class GeneticAlgorithm(object):
             exit()
 
         history = [evaluate(student_model, test_dl)]
-        history += train_model_with_distillation(best.get_heuristic_combination(), heuristicToLayerDict, epochs,
-                                                 best.get_batches(), 2,
+        history += train_model_with_distillation(best.get_heuristic_combination(), heuristicToLayerDict, epochs, initial_epochs, total_epochs,
+                                                 best.get_batches(), numOfBatchesToDistill,
                                                  train_dl,
                                                  test_dl, student_model, student_model_number, teacher_model,
                                                  teacher_model_number,

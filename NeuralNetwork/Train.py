@@ -32,18 +32,18 @@ def get_lr(optimizer):
         return param_group['lr']
 
 
-def train_student(student_model, numOfEpochs, train_dl, test_dl, optimizer, max_lr, weight_decay, scheduler,
+def train_student(student_model, initial_epochs, total_epochs, train_dl, test_dl, optimizer, max_lr, weight_decay, scheduler,
                   grad_clip=None):
-    if numOfEpochs == 0:
+    if initial_epochs == 0:
         return student_model
 
     torch.cuda.empty_cache()
     history = []
 
     optimizer = optimizer(student_model.parameters(), max_lr, weight_decay=weight_decay)
-    scheduler = scheduler(optimizer, max_lr, epochs=80, steps_per_epoch=len(train_dl))
+    scheduler = scheduler(optimizer, max_lr, epochs=total_epochs, steps_per_epoch=len(train_dl))
 
-    for epoch in range(numOfEpochs):
+    for epoch in range(initial_epochs):
         student_model.train()  # put the model in train mode
         train_loss = []
         train_acc = []
@@ -81,7 +81,7 @@ def train_student(student_model, numOfEpochs, train_dl, test_dl, optimizer, max_
         student_model.epoch_end(epoch, result)
         history.append(result)
 
-    print("Student model partially trained for: " + str(numOfEpochs) + " epochs.")
+    print("Student model partially trained for: " + str(initial_epochs) + " epochs.")
     return student_model
 
 
@@ -275,7 +275,7 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
     return distill_batch_arr
 
 
-def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs, distill_batch_arr,
+def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs, initial_epochs, total_epochs, distill_batch_arr,
                                   numOfBatchesToDistill, train_dl, test_dl, student_model,
                                   student_model_number, teacher_model,
                                   teacher_model_number, device, optimizer, max_lr,
@@ -286,10 +286,10 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
     history = []
 
     optimizer = optimizer(student_model.parameters(), max_lr, weight_decay=weight_decay)
-    scheduler = scheduler(optimizer, max_lr=max_lr, epochs=80, steps_per_epoch=len(train_dl), last_epoch=-1)
+    scheduler = scheduler(optimizer, max_lr=max_lr, epochs=total_epochs, steps_per_epoch=len(train_dl), last_epoch=-1)
     distill_optimizer_implemented = distill_optimizer(student_model.parameters(), lr=distill_lr)
 
-    for _ in range(5000):
+    for _ in range(initial_epochs*len(train_dl)):
         scheduler.step()
 
     for epoch in range(epochs):

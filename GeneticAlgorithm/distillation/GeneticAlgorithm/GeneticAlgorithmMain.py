@@ -37,18 +37,21 @@ class GeneticAlgorithmMain(object):
         teacher_model_number = 18  # ResNet 110
         student_model_number = 9  # ResNet 56   3 = ResNet 20
 
+        initial_epochs = 10
         epochs = 70
+        total_epochs = 80
         BATCH_SIZE = 100
 
         optimizer = torch.optim.Adam
         scheduler = torch.optim.lr_scheduler.OneCycleLR
         max_lr = 0.003
-        grad_clip = 0.1
+        grad_clip = 1
         weight_decay = 0
 
         distill_optimizer = torch.optim.Adam
-        distill_lr = 0.0002
+        distill_lr = 0.0005
         kd_loss_type = 'cosine'
+        numOfBatchesToDistill = 2
 
         heuristicToLayerDict = {
             'a': 1,
@@ -146,7 +149,9 @@ class GeneticAlgorithmMain(object):
             '2': 54,
         }
 
-        print("Hyper parameters:")
+        print("HYPER PARAMETERS:")
+        print("Number of initial epochs: " + str(initial_epochs))
+        print("Number of total epochs: " + str(total_epochs))
         print("Number of epochs: " + str(epochs))
         print("Batch size: " + str(BATCH_SIZE))
         print("Optimizer: " + str(optimizer))
@@ -157,10 +162,11 @@ class GeneticAlgorithmMain(object):
         print("KD loss type: " + str(kd_loss_type))
         print("Distill  optimizer : " + str(distill_optimizer))
         print("Distill  optimizer learning rate: " + str(distill_lr))
+        print("Batches distilled per epoch: " + str(numOfBatchesToDistill))
 
         trainingParameters = [teacher_model_number, student_model_number, BATCH_SIZE, epochs, optimizer, max_lr,
                               distill_optimizer, distill_lr, grad_clip, weight_decay, scheduler, kd_loss_type,
-                              heuristicToLayerDict56]
+                              heuristicToLayerDict56, numOfBatchesToDistill, initial_epochs, total_epochs]
         solution = genetic_algorithm.evolve(trainingParameters)
 
         print("Best Solution")
@@ -170,7 +176,9 @@ class GeneticAlgorithmMain(object):
         print("Solution: ")
         GeneticAlgorithmMain.display_solution(solution.get_solution())
         # Print NN parameters:
-        print("Hyper parameters:")
+        print("HYPER PARAMETERS:")
+        print("Number of initial epochs: " + str(initial_epochs))
+        print("Number of total epochs: " + str(total_epochs))
         print("Number of epochs: " + str(epochs))
         print("Batch size: " + str(BATCH_SIZE))
         print("Optimizer: " + str(optimizer))
@@ -181,6 +189,7 @@ class GeneticAlgorithmMain(object):
         print("KD loss type: " + str(kd_loss_type))
         print("Distill  optimizer : " + str(distill_optimizer))
         print("Distill  optimizer learning rate: " + str(distill_lr))
+        print("Batches distilled per epoch: " + str(numOfBatchesToDistill))
 
     @classmethod
     def display_solution(cls, solution):
