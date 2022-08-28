@@ -45,11 +45,11 @@ class GeneticAlgorithmMain(object):
         optimizer = torch.optim.Adam
         scheduler = torch.optim.lr_scheduler.OneCycleLR
         max_lr = 0.003
-        grad_clip = 1
+        grad_clip = 0.1
         weight_decay = 0
 
         distill_optimizer = torch.optim.Adam
-        distill_lr = 0.0005
+        distill_lr = 0.00001
         kd_loss_type = 'cosine'
         numOfBatchesToDistill = 2
 

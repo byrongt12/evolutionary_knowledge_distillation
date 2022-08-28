@@ -306,7 +306,7 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
                 kd_loss_arr = distill56(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer,
                                         distill_optimizer,
                                         distill_lr,
-                                        distill_batch,
+                                        batch,  # Does not go NaN when the batch is random
                                         student_model,
                                         student_model_number, teacher_model, teacher_model_number, device,
                                         lossOnly=True)
