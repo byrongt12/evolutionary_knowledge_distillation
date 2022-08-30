@@ -221,7 +221,7 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
     torch.cuda.empty_cache()
 
     optimizer = torch.optim.SGD(student_model.parameters(), 0.0001)
-    distill_optimizer_implemented = distill_optimizer(student_model.parameters(), lr=distill_lr)
+    distill_optimizer_implemented = distill_optimizer(student_model.parameters(), lr=0.001)
     distill_batch_arr = []
 
     for epoch in range(epochs):
@@ -301,12 +301,13 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
 
         for batch in train_dl:
 
-            if batch_count <= numOfBatchesToDistill:
-                distill_batch = distill_batch_arr[batch_count % len(distill_batch_arr)]
+            # if batch_count <= numOfBatchesToDistill:
+            if epoch == 3:
+                # distill_batch = distill_batch_arr[batch_count % len(distill_batch_arr)]
                 kd_loss_arr = distill56(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer,
                                         distill_optimizer,
                                         distill_lr,
-                                        batch,  # Does not go NaN when the batch is random
+                                        batch,  # Less chance of NaN when the batch is random
                                         student_model,
                                         student_model_number, teacher_model, teacher_model_number, device,
                                         lossOnly=True)
@@ -318,9 +319,7 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
                     nn.utils.clip_grad_value_(student_model.parameters(), grad_clip)
 
                 distill_optimizer_implemented.step()
-
-                for param in student_model.parameters():  # instead of: optimizer.zero_grad()
-                    param.grad = None
+                distill_optimizer_implemented.zero_grad()
 
             # Normal error and update
             loss, acc = student_model.training_step(batch)

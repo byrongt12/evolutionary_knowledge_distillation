@@ -97,8 +97,6 @@ class DistillationSolution(Solution):
         grad_clip = trainingItems[16]
         initial_epochs = trainingItems[17]
 
-        print(initial_epochs)
-
         student_chk_path = "../../../NeuralNetwork/resnet56_initialized_" + str(initial_epochs) + "_epochs.ckpt"
         if path.exists(student_chk_path):
             student_model.load_state_dict(torch.load(student_chk_path))

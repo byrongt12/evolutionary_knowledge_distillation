@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="fd1a12e9-9cad-4e00-a96a-4dd2c6c6a6e2" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/Code with GA.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Code with GA.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GeneticAlgorithm/distillation/GeneticAlgorithm/GeneticAlgorithmMain.py" beforeDir="false" afterPath="$PROJECT_DIR$/GeneticAlgorithm/distillation/GeneticAlgorithm/GeneticAlgorithmMain.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GeneticAlgorithm/distillation/DistillationSolution.py" beforeDir="false" afterPath="$PROJECT_DIR$/GeneticAlgorithm/distillation/DistillationSolution.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/GeneticAlgorithm/distillation/GeneticAlgorithm/Parameters.txt" beforeDir="false" afterPath="$PROJECT_DIR$/GeneticAlgorithm/distillation/GeneticAlgorithm/Parameters.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/NeuralNetwork/Train.py" beforeDir="false" afterPath="$PROJECT_DIR$/NeuralNetwork/Train.py" afterDir="false" />
     </list>
@@ -34,7 +36,7 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="/usr/local/bin/python3.9" />
+      <option name="SDK_HOME" value="C:\Users\byron\AppData\Local\Programs\Python\Python310\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/GeneticAlgorithm/distillation/GeneticAlgorithm" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -59,5 +61,19 @@
       <updated>1661374846322</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ID_ORDER">
+      <list>
+        <option value="Default.Root" />
+        <option value="Default.Author" />
+        <option value="Default.Date" />
+        <option value="Default.Subject" />
+        <option value="Space.CommitStatus" />
+      </list>
+    </option>
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
 </project>
