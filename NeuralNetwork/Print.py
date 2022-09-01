@@ -119,3 +119,12 @@ def plot_lrs(history):
     plt.xlabel("Batch number")
     plt.ylabel("Learning rate")
     plt.show()
+
+def plot_ga_best(best_arr):
+    plt.title("Best fitness over generations")
+    generations_arr = []
+    for x in range(len(best_arr)):
+        generations_arr.append(x+1)
+    plt.plot(generations_arr, best_arr)
+    plt.savefig('best_over_generations.png')
+

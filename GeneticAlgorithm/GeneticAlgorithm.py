@@ -29,7 +29,7 @@ from NeuralNetwork.Train import train_student, train_model_distill_only
 from NeuralNetwork.ResNet import ResNet
 from NeuralNetwork.ResidualBlock import ResidualBlock
 from NeuralNetwork.Train import train_model, evaluate, train_model_with_distillation
-from NeuralNetwork.Print import plot_acc, plot_loss, printFeatureMaps
+from NeuralNetwork.Print import plot_acc, plot_loss, printFeatureMaps, plot_ga_best
 
 
 class GeneticAlgorithm(object):
@@ -603,12 +603,14 @@ class GeneticAlgorithm(object):
             print("Heuristic Combination:", best.get_heuristic_combination())
             print()
         count = 0
+        bestArr = []
         while count < self.no_of_generations:
             if self.print_:
                 print("Generation", count + 1)
             ind = self.regenerate(best, trainingItems)
             if ind.fitter(best) == 1:
                 best = ind
+                bestArr.append(best)
             if self.print_:
                 print("Generation Best Fitness:", ind.get_fitness())
                 print("Generation Best Heuristic Combination: " + ind.get_heuristic_combination())
@@ -616,7 +618,10 @@ class GeneticAlgorithm(object):
                 print("Overall Best Heuristic Combination: " + best.get_heuristic_combination())
                 print()
             count += 1
-        print("Completed evolving heuristic combination")
+
+        print("Completed evolving heuristic combination.")
+        plot_ga_best(bestArr)
+        print("Generation best graph created.")
         print("Now training with heuristic combination...")
 
         student_init_chk_path = "../../../NeuralNetwork/resnet56_initialized_" + str(initial_epochs) + "_epochs.ckpt"
@@ -635,6 +640,7 @@ class GeneticAlgorithm(object):
                                                  device, optimizer, max_lr,
                                                  weight_decay, scheduler, kd_loss_type, distill_optimizer,
                                                  distill_lr, grad_clip)
+
         plot_acc(history)
         plot_loss(history)
 
