@@ -122,9 +122,11 @@ def plot_lrs(history):
 
 def plot_ga_best(best_arr):
     plt.title("Best fitness over generations")
-    generations_arr = []
-    for x in range(len(best_arr)):
-        generations_arr.append(x+1)
-    plt.plot(generations_arr, best_arr)
+    plt.xlabel("Generation")
+    plt.ylabel("Best validation accuracy")
+    generations_arr = np.array(range(1, len(best_arr) + 1))
+    plt.plot(generations_arr, best_arr, color="red", marker="o", label="Best val accuracy")
+    plt.legend()
     plt.savefig('best_over_generations.png')
+
 

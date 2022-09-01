@@ -482,7 +482,7 @@ class GeneticAlgorithm(object):
             elif not number_of_mutations == 0:
                 number_of_mutations += len(self.population) - (
                         number_of_mutations + number_of_crossovers + number_of_reproductions)
-        best = best_individual
+        best = self.population[0]  # before: best = best_individual
         index = 0
         new_population: List[Solution] = []
         for i in range(number_of_reproductions):
@@ -608,9 +608,9 @@ class GeneticAlgorithm(object):
             if self.print_:
                 print("Generation", count + 1)
             ind = self.regenerate(best, trainingItems)
+            bestArr.append(ind.get_fitness())
             if ind.fitter(best) == 1:
                 best = ind
-                bestArr.append(best)
             if self.print_:
                 print("Generation Best Fitness:", ind.get_fitness())
                 print("Generation Best Heuristic Combination: " + ind.get_heuristic_combination())
