@@ -30,7 +30,7 @@ class BaseModel(nn.Module):
         teacher_out = rescale(teacher_out)
 
         out = self(images)
-        out = rescale(out)
+        # out = rescale(out)
 
         loss = F.cross_entropy(out, teacher_out)
         acc = accuracy_vanilla_kd(out, teacher_out)
