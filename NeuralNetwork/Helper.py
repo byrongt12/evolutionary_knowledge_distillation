@@ -7,6 +7,7 @@ import torchvision.transforms as transforms
 from torchmetrics.functional import pairwise_euclidean_distance
 from torch.nn.functional import normalize
 
+
 def printLayerAndGradientBoolean(student_model):
     model_children = list(student_model.children())
     counter = 0
@@ -191,6 +192,7 @@ def differentSizeMaps(featureMapForTeacher, featureMapForStudent):
 
     return A, B
 
+
 def getRandomBatches(numOfBatches, dataLoader):
     randomBatches = []
 
@@ -203,6 +205,13 @@ def getRandomBatches(numOfBatches, dataLoader):
 def weights_init(m):
     if isinstance(m, nn.Conv2d):
         torch.nn.init.xavier_uniform(m.weight.data)
+
+
+def rescale(t, bottom=0, top=1):
+    t_min, t_max = t.min(), t.max()
+    new_min, new_max = bottom, top
+    t = (t - t_min) / (t_max - t_min) * (new_max - new_min) + new_min
+    return t
 
 
 def distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer, distill_lr, batch,

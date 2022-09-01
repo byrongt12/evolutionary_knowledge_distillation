@@ -49,7 +49,7 @@ class GeneticAlgorithmMain(object):
         weight_decay = 0
 
         distill_optimizer = torch.optim.Adam
-        distill_lr = 0.00001
+        distill_lr = 0.0003
         kd_loss_type = 'cosine'
         numOfBatchesToDistill = 2
 

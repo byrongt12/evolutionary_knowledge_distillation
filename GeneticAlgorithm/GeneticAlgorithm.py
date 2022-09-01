@@ -584,7 +584,7 @@ class GeneticAlgorithm(object):
             print("Training student model before distillation experimentation...")
             student_model = train_student(student_model, initial_epochs, total_epochs, train_dl, test_dl, optimizer, max_lr, weight_decay,
                                           scheduler,
-                                          grad_clip)
+                                          teacher_model, grad_clip)
 
             torch.save(student_model.state_dict(), "../../../NeuralNetwork/resnet56_initialized_" + str(initial_epochs) + "_epochs.ckpt")
         else:

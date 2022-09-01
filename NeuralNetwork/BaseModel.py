@@ -2,10 +2,17 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
+from NeuralNetwork.Helper import rescale
+
+
 def accuracy(predicted, actual):
     _, predictions = torch.max(predicted, dim=1)
     return torch.tensor(torch.sum(predictions == actual).item() / len(predictions))
 
+def accuracy_vanilla_kd(predicted, actual):
+    _, predictions = torch.max(predicted, dim=1)
+    _, actual_grouped = torch.max(actual, dim=1)
+    return torch.tensor(torch.sum(predictions == actual_grouped).item() / len(predictions))
 
 class BaseModel(nn.Module):
     def training_step(self, batch):
@@ -13,6 +20,20 @@ class BaseModel(nn.Module):
         out = self(images)
         loss = F.cross_entropy(out, labels)
         acc = accuracy(out, labels)
+        return loss, acc
+
+    def training_step_vanilla_kd(self, batch, teacher_model):
+
+        images, labels = batch
+
+        teacher_out = teacher_model(images)
+        teacher_out = rescale(teacher_out)
+
+        out = self(images)
+        out = rescale(out)
+
+        loss = F.cross_entropy(out, teacher_out)
+        acc = accuracy_vanilla_kd(out, teacher_out)
         return loss, acc
 
     def validation_step(self, batch):

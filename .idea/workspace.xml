@@ -2,12 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="fd1a12e9-9cad-4e00-a96a-4dd2c6c6a6e2" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/Code with GA.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Code with GA.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GeneticAlgorithm/GeneticAlgorithm.py" beforeDir="false" afterPath="$PROJECT_DIR$/GeneticAlgorithm/GeneticAlgorithm.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/GeneticAlgorithm/distillation/DistillationSolution.py" beforeDir="false" afterPath="$PROJECT_DIR$/GeneticAlgorithm/distillation/DistillationSolution.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GeneticAlgorithm/distillation/GeneticAlgorithm/Parameters.txt" beforeDir="false" afterPath="$PROJECT_DIR$/GeneticAlgorithm/distillation/GeneticAlgorithm/Parameters.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GeneticAlgorithm/distillation/GeneticAlgorithm/GeneticAlgorithmMain.py" beforeDir="false" afterPath="$PROJECT_DIR$/GeneticAlgorithm/distillation/GeneticAlgorithm/GeneticAlgorithmMain.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NeuralNetwork/BaseModel.py" beforeDir="false" afterPath="$PROJECT_DIR$/NeuralNetwork/BaseModel.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NeuralNetwork/Helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/NeuralNetwork/Helper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/NeuralNetwork/Train.py" beforeDir="false" afterPath="$PROJECT_DIR$/NeuralNetwork/Train.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NeuralNetwork/resnet56_initialized_10_epochs.ckpt" beforeDir="false" afterPath="$PROJECT_DIR$/NeuralNetwork/resnet56_initialized_10_epochs.ckpt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NeuralNetwork/resnet56_initialized_5_epochs.ckpt" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,7 +32,7 @@
     <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
   </component>
   <component name="RunManager">
-    <configuration name="GeneticAlgorithmMain" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+    <configuration name="GeneticAlgorithmMain" type="PythonConfigurationType" factoryName="Python" singleton="false" nameIsGenerated="true">
       <module name="Code with GA" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -74,6 +77,15 @@
     </option>
   </component>
   <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
 </project>

@@ -32,8 +32,7 @@ def get_lr(optimizer):
         return param_group['lr']
 
 
-def train_student(student_model, initial_epochs, total_epochs, train_dl, test_dl, optimizer, max_lr, weight_decay, scheduler,
-                  grad_clip=None):
+def train_student(student_model, initial_epochs, total_epochs, train_dl, test_dl, optimizer, max_lr, weight_decay, scheduler, teacher_model, grad_clip=None):
     if initial_epochs == 0:
         return student_model
 
@@ -56,7 +55,7 @@ def train_student(student_model, initial_epochs, total_epochs, train_dl, test_dl
             # print(batch_count)
 
             # Normal error and update
-            loss, acc = student_model.training_step(batch)
+            loss, acc = student_model.training_step_vanilla_kd(batch, teacher_model)
             train_loss.append(loss)
             train_acc.append(acc)
 
@@ -85,7 +84,7 @@ def train_student(student_model, initial_epochs, total_epochs, train_dl, test_dl
     return student_model
 
 
-def train_model(epochs, train_dl, test_dl, model, optimizer, max_lr, weight_decay, scheduler, grad_clip=None):
+def train_model(epochs, train_dl, test_dl, model, optimizer, max_lr, weight_decay, scheduler, teacher_model, grad_clip=None):
     torch.cuda.empty_cache()
     history = []
 
@@ -99,7 +98,7 @@ def train_model(epochs, train_dl, test_dl, model, optimizer, max_lr, weight_deca
         lrs = []
 
         for batch in train_dl:
-            loss, acc = model.training_step(batch)
+            loss, acc = model.training_step_vanilla_kd(batch, teacher_model)
             train_loss.append(loss)
             train_acc.append(acc)
 
@@ -145,7 +144,7 @@ def train_model_normal_and_distill(heuristicString, heuristicToLayerDict, epochs
         # Normal error and update
 
         for batch in train_dl:
-            loss, acc = student_model.training_step(batch)
+            loss, acc = student_model.training_step_vanilla_kd(batch, teacher_model)
             loss.backward()
 
             if grad_clip:
@@ -220,8 +219,8 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
                                           grad_clip=None):
     torch.cuda.empty_cache()
 
-    optimizer = torch.optim.SGD(student_model.parameters(), 0.0001)
-    distill_optimizer_implemented = distill_optimizer(student_model.parameters(), lr=0.001)
+    optimizer = torch.optim.SGD(student_model.parameters(), max_lr)
+    distill_optimizer_implemented = distill_optimizer(student_model.parameters(), lr=distill_lr)
     distill_batch_arr = []
 
     for epoch in range(epochs):
@@ -256,7 +255,7 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
                 param.grad = None
 
             # Normal error and update
-            loss, acc = student_model.training_step(batch)
+            loss, acc = student_model.training_step_vanilla_kd(batch, teacher_model)
             train_loss.append(loss)
             train_acc.append(acc)
 
@@ -301,8 +300,7 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
 
         for batch in train_dl:
 
-            # if batch_count <= numOfBatchesToDistill:
-            if epoch == 3:
+            if batch_count <= numOfBatchesToDistill:
                 # distill_batch = distill_batch_arr[batch_count % len(distill_batch_arr)]
                 kd_loss_arr = distill56(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer,
                                         distill_optimizer,
@@ -322,7 +320,7 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
                 distill_optimizer_implemented.zero_grad()
 
             # Normal error and update
-            loss, acc = student_model.training_step(batch)
+            loss, acc = student_model.training_step_vanilla_kd(batch, teacher_model)
             train_loss.append(loss)
             train_acc.append(acc)
 
