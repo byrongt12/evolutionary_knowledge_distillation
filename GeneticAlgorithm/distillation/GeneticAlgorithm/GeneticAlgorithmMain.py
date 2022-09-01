@@ -51,7 +51,7 @@ class GeneticAlgorithmMain(object):
         distill_optimizer = torch.optim.Adam
         distill_lr = 0.0003
         kd_loss_type = 'cosine'
-        numOfBatchesToDistill = 2
+        numOfBatchesToDistill = 5
 
         heuristicToLayerDict = {
             'a': 1,
