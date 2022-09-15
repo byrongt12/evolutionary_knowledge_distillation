@@ -390,3 +390,72 @@ def distill56(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, di
             param.grad = None
 
     return kd_loss_arr
+
+
+def distill_predifined(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer, distill_lr,
+                       batch,
+                       student_model,
+                       student_model_number, teacher_model, teacher_model_number, device, lossOnly=False):
+    student_model.train()  # put the model in train mode
+
+    kd_loss_arr = []
+    featureMapNumForStudentArr = []
+    featureMapNumForTeacherArr = []
+    distill_optimizer_implemented = distill_optimizer(student_model.parameters(), lr=distill_lr)
+
+    for x in range(0, 110):
+        if x < 55:
+            featureMapNumForStudentArr.append(x)
+
+        if x < 109:
+            if x % 2 == 0:
+                featureMapNumForTeacherArr.append(x)
+
+    images, labels = batch
+
+    for image in images:
+
+        featureMapForTeacherArr = getFeatureMaps(teacher_model, device, image)
+        featureMapForStudentArr = getFeatureMaps(student_model, device, image)
+
+        for i in range(0, (len(featureMapNumForStudentArr))):
+
+            featureMapNumForStudent = featureMapNumForStudentArr[i]
+            featureMapNumForTeacher = featureMapNumForTeacherArr[i]
+
+            featureMapForTeacher = featureMapForTeacherArr[featureMapNumForTeacher]
+            featureMapForStudent = featureMapForStudentArr[featureMapNumForStudent]
+
+            # Normalize tensor so NaN values do not get produced by loss function
+
+            v_min, v_max = featureMapForTeacher.min(), featureMapForTeacher.max()
+            new_min, new_max = -1, 1
+            t = (featureMapForTeacher - v_min) / (v_max - v_min) * (new_max - new_min) + new_min
+
+            v_min, v_max = featureMapForStudent.min(), featureMapForStudent.max()
+            new_min, new_max = -1, 1
+            s = (featureMapForStudent - v_min) / (v_max - v_min) * (new_max - new_min) + new_min
+
+            # Loss functions: Cosine, SSIM, PSNR and Euclidean dist
+            distill_loss = 0
+            if kd_loss_type == 'ssim':
+                distill_loss = -1 * ssim_loss(s, t, max_val=2.0, window_size=1)
+            elif kd_loss_type == 'psnr':
+                distill_loss = psnr_loss(s, t, max_val=1.0)
+            elif kd_loss_type == 'cosine':  # best
+                distill_loss = F.cosine_similarity(s.reshape(1, -1), t.reshape(1, -1))
+            elif kd_loss_type == 'euclidean':
+                distill_loss = pairwise_euclidean_distance(s.reshape(1, -1), t.reshape(1, -1))
+
+            kd_loss_arr.append(distill_loss)
+
+    if not lossOnly:
+        for kd_loss in kd_loss_arr:
+            kd_loss.backward(retain_graph=True)
+
+        distill_optimizer_implemented.step()
+
+        for param in student_model.parameters():  # instead of: optimizer.zero_grad()
+            param.grad = None
+
+    return kd_loss_arr

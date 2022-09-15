@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from NeuralNetwork.Helper import distill, distill56
+from NeuralNetwork.Helper import distill, distill56, distill_predifined
 
 # Speed up training
 torch.autograd.set_detect_anomaly(False)
@@ -32,7 +32,8 @@ def get_lr(optimizer):
         return param_group['lr']
 
 
-def train_student(student_model, initial_epochs, total_epochs, train_dl, test_dl, optimizer, max_lr, weight_decay, scheduler, teacher_model, grad_clip=None):
+def train_student(student_model, initial_epochs, total_epochs, train_dl, test_dl, optimizer, max_lr, weight_decay,
+                  scheduler, teacher_model, grad_clip=None):
     if initial_epochs == 0:
         return student_model
 
@@ -84,7 +85,8 @@ def train_student(student_model, initial_epochs, total_epochs, train_dl, test_dl
     return student_model
 
 
-def train_model(epochs, train_dl, test_dl, model, optimizer, max_lr, weight_decay, scheduler, teacher_model, grad_clip=None):
+def train_model(epochs, train_dl, test_dl, model, optimizer, max_lr, weight_decay, scheduler, teacher_model,
+                grad_clip=None):
     torch.cuda.empty_cache()
     history = []
 
@@ -274,7 +276,8 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
     return distill_batch_arr
 
 
-def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs, initial_epochs, total_epochs, distill_batch_arr,
+def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs, initial_epochs, total_epochs,
+                                  distill_batch_arr,
                                   numOfBatchesToDistill, train_dl, test_dl, student_model,
                                   student_model_number, teacher_model,
                                   teacher_model_number, device, optimizer, max_lr,
@@ -288,7 +291,7 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
     scheduler = scheduler(optimizer, max_lr=max_lr, epochs=total_epochs, steps_per_epoch=len(train_dl), last_epoch=-1)
     distill_optimizer_implemented = distill_optimizer(student_model.parameters(), lr=distill_lr)
 
-    for _ in range(initial_epochs*len(train_dl)):
+    for _ in range(initial_epochs * len(train_dl)):
         scheduler.step()
 
     for epoch in range(epochs):
@@ -302,13 +305,13 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
 
             if batch_count <= numOfBatchesToDistill:
                 # distill_batch = distill_batch_arr[batch_count % len(distill_batch_arr)]
-                kd_loss_arr = distill56(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer,
-                                        distill_optimizer,
-                                        distill_lr,
-                                        batch,  # Less chance of NaN when the batch is random
-                                        student_model,
-                                        student_model_number, teacher_model, teacher_model_number, device,
-                                        lossOnly=True)
+                kd_loss_arr = distill_predifined(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer,
+                                                 distill_optimizer,
+                                                 distill_lr,
+                                                 batch,  # Less chance of NaN when the batch is random
+                                                 student_model,
+                                                 student_model_number, teacher_model, teacher_model_number, device,
+                                                 lossOnly=True)
 
                 for kd_loss in kd_loss_arr:
                     kd_loss.backward(retain_graph=True)

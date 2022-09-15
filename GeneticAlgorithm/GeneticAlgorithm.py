@@ -551,7 +551,7 @@ class GeneticAlgorithm(object):
         heuristicToLayerDict = trainingParameters[12]
         numOfBatchesToDistill = trainingParameters[13]
         initial_epochs = trainingParameters[14]
-        total_epochs =  trainingParameters[15]
+        total_epochs = trainingParameters[15]
 
         '''# Save old student weights to a file:
         torch.save(student_model.state_dict(), "../../../NeuralNetwork/resnet20_initial.ckpt")
