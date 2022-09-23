@@ -96,6 +96,7 @@ class DistillationSolution(Solution):
         distill_lr = trainingItems[15]
         grad_clip = trainingItems[16]
         initial_epochs = trainingItems[17]
+        layerCounter = trainingItems[18]
 
         student_chk_path = "../../../NeuralNetwork/resnet56_initialized_" + str(initial_epochs) + "_epochs.ckpt"
         if path.exists(student_chk_path):
@@ -115,7 +116,7 @@ class DistillationSolution(Solution):
                                                                   teacher_model_number, device, optimizer, 0.0001,
                                                                   weight_decay, scheduler, kd_loss_type,
                                                                   distill_optimizer,
-                                                                  0.001)
+                                                                  0.001, layerCounter)
 
         result = evaluate(student_model, test_dl)
 

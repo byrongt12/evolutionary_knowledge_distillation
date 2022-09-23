@@ -24,12 +24,12 @@ from torchvision.datasets import CIFAR100
 
 from os import path
 
-from NeuralNetwork.Helper import weights_init, getFeatureMaps
+from NeuralNetwork.Helper import weights_init, getFeatureMaps, getModelWeights
 from NeuralNetwork.Train import train_student, train_model_distill_only
 from NeuralNetwork.ResNet import ResNet
 from NeuralNetwork.ResidualBlock import ResidualBlock
 from NeuralNetwork.Train import train_model, evaluate, train_model_with_distillation
-from NeuralNetwork.Print import plot_acc, plot_loss, printFeatureMaps, plot_ga_best
+from NeuralNetwork.Print import plot_acc, plot_loss, printFeatureMaps, plot_ga_best, plot_layer_counter
 
 
 class GeneticAlgorithm(object):
@@ -590,10 +590,11 @@ class GeneticAlgorithm(object):
         else:
             print("Partially trained student model found.")
 
+        layerCounter = []
         trainingItems = [heuristicToLayerDict, epochs, train_dl, test_dl, student_model,
                          student_model_number,
                          teacher_model, teacher_model_number, device, optimizer, max_lr, weight_decay, scheduler,
-                         kd_loss_type, distill_optimizer, distill_lr, grad_clip, initial_epochs]
+                         kd_loss_type, distill_optimizer, distill_lr, grad_clip, initial_epochs, layerCounter]
 
         if self.print_:
             print("Generation 0")
@@ -622,6 +623,8 @@ class GeneticAlgorithm(object):
         print("Completed evolving heuristic combination.")
         plot_ga_best(bestArr)
         print("Generation best graph created.")
+        plot_layer_counter(layerCounter)
+        print("Layer counter graph created.")
         print("Now training with heuristic combination...")
 
         student_init_chk_path = "../../../NeuralNetwork/resnet56_initialized_" + str(initial_epochs) + "_epochs.ckpt"

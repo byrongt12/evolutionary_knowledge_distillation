@@ -1,3 +1,6 @@
+import math
+
+import numpy
 import torch  # need this for eval function
 import torch.nn as nn
 import torch.nn.functional as F
@@ -304,7 +307,8 @@ def distill(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, dist
 
 def distill56(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, distill_optimizer, distill_lr, batch,
               student_model,
-              student_model_number, teacher_model, teacher_model_number, device, lossOnly=False):
+              student_model_number, teacher_model, teacher_model_number, device, doLayerCounter, layerCounter,
+              layerCounterAdderBool, lossOnly=False):
     student_model.train()  # put the model in train mode
 
     kd_loss_arr = []
@@ -342,6 +346,11 @@ def distill56(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, di
 
         featureMapNumForTeacherArr.append(teacher_layer_number)
 
+    if doLayerCounter:
+        if layerCounterAdderBool[0]:
+            layerCounter += featureMapNumForTeacherArr
+            layerCounterAdderBool[0] = False
+
     images, labels = batch
 
     for image in images:
@@ -378,7 +387,8 @@ def distill56(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer, di
             elif kd_loss_type == 'euclidean':
                 distill_loss = pairwise_euclidean_distance(s.reshape(1, -1), t.reshape(1, -1))
 
-            kd_loss_arr.append(distill_loss)
+            if not math.isnan(distill_loss):
+                kd_loss_arr.append(distill_loss)
 
     if not lossOnly:
         for kd_loss in kd_loss_arr:
@@ -406,10 +416,13 @@ def distill_predifined(heuristicString, heuristicToLayerDict, kd_loss_type, opti
     for x in range(0, 110):
         if x < 55:
             featureMapNumForStudentArr.append(x)
+            featureMapNumForStudentArr.append(x)
 
         if x < 109:
-            if x % 2 == 0:
-                featureMapNumForTeacherArr.append(x)
+            # Trying all the layers.
+            featureMapNumForTeacherArr.append(x)
+
+    del featureMapNumForStudentArr[0]
 
     images, labels = batch
 
@@ -447,7 +460,8 @@ def distill_predifined(heuristicString, heuristicToLayerDict, kd_loss_type, opti
             elif kd_loss_type == 'euclidean':
                 distill_loss = pairwise_euclidean_distance(s.reshape(1, -1), t.reshape(1, -1))
 
-            kd_loss_arr.append(distill_loss)
+            if not math.isnan(distill_loss):
+                kd_loss_arr.append(distill_loss)
 
     if not lossOnly:
         for kd_loss in kd_loss_arr:

@@ -217,7 +217,7 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
                                           student_model_number, teacher_model,
                                           teacher_model_number, device, optimizer, max_lr,
                                           weight_decay, scheduler, kd_loss_type, distill_optimizer,
-                                          distill_lr,
+                                          distill_lr, layerCounter,
                                           grad_clip=None):
     torch.cuda.empty_cache()
 
@@ -229,6 +229,7 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
         student_model.train()  # put the model in train mode
         train_loss = []
         train_acc = []
+        layerCounterAdderBool = [True]
 
         batch_count = 0
 
@@ -246,7 +247,8 @@ def train_model_partial_with_distillation(heuristicString, heuristicToLayerDict,
                                     distill_lr,
                                     distill_batch,
                                     student_model,
-                                    student_model_number, teacher_model, teacher_model_number, device, lossOnly=True)
+                                    student_model_number, teacher_model, teacher_model_number, device, True,
+                                    layerCounter, layerCounterAdderBool, lossOnly=True)
 
             for kd_loss in kd_loss_arr:
                 kd_loss.backward(retain_graph=True)
@@ -305,19 +307,20 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
 
             if batch_count <= numOfBatchesToDistill:
                 # distill_batch = distill_batch_arr[batch_count % len(distill_batch_arr)]
-                kd_loss_arr = distill_predifined(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer,
-                                                 distill_optimizer,
-                                                 distill_lr,
-                                                 batch,  # Less chance of NaN when the batch is random
-                                                 student_model,
-                                                 student_model_number, teacher_model, teacher_model_number, device,
-                                                 lossOnly=True)
+                kd_loss_arr = distill56(heuristicString, heuristicToLayerDict, kd_loss_type, optimizer,
+                                        distill_optimizer,
+                                        distill_lr,
+                                        batch,  # Less chance of NaN when the batch is random
+                                        student_model,
+                                        student_model_number, teacher_model, teacher_model_number, device, False, [],
+                                        [False],
+                                        lossOnly=True)
 
                 for kd_loss in kd_loss_arr:
                     kd_loss.backward(retain_graph=True)
 
                 if grad_clip:
-                    nn.utils.clip_grad_value_(student_model.parameters(), grad_clip)
+                    nn.utils.clip_grad_value_(student_model.parameters(), 0.001)
 
                 distill_optimizer_implemented.step()
                 distill_optimizer_implemented.zero_grad()

@@ -120,7 +120,9 @@ def plot_lrs(history):
     plt.ylabel("Learning rate")
     plt.show()
 
+
 def plot_ga_best(best_arr):
+    plt.clf()
     plt.title("Best fitness over generations")
     plt.xlabel("Generation")
     plt.ylabel("Best validation accuracy")
@@ -130,3 +132,11 @@ def plot_ga_best(best_arr):
     plt.savefig('best_over_generations.png')
 
 
+def plot_layer_counter(layerCounter):
+    plt.clf()
+    plt.title("Layer counter")
+    plt.xlabel("Layer number")
+    plt.ylabel("Number of times a layer was chosen")
+    bins = np.arange(0, max(layerCounter) + 1.5) - 0.5
+    plt.hist(layerCounter, bins=bins)
+    plt.savefig('layer_counter.png')
