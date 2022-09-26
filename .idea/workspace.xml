@@ -3,12 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="fd1a12e9-9cad-4e00-a96a-4dd2c6c6a6e2" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GeneticAlgorithm/GeneticAlgorithm.py" beforeDir="false" afterPath="$PROJECT_DIR$/GeneticAlgorithm/GeneticAlgorithm.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GeneticAlgorithm/distillation/DistillationSolution.py" beforeDir="false" afterPath="$PROJECT_DIR$/GeneticAlgorithm/distillation/DistillationSolution.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/GeneticAlgorithm/distillation/GeneticAlgorithm/GeneticAlgorithmMain.py" beforeDir="false" afterPath="$PROJECT_DIR$/GeneticAlgorithm/distillation/GeneticAlgorithm/GeneticAlgorithmMain.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GeneticAlgorithm/distillation/GeneticAlgorithm/best_over_generations.png" beforeDir="false" afterPath="$PROJECT_DIR$/GeneticAlgorithm/distillation/GeneticAlgorithm/best_over_generations.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/NeuralNetwork/Helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/NeuralNetwork/Helper.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/NeuralNetwork/Print.py" beforeDir="false" afterPath="$PROJECT_DIR$/NeuralNetwork/Print.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GeneticAlgorithm/distillation/GeneticAlgorithm/Parameters.txt" beforeDir="false" afterPath="$PROJECT_DIR$/GeneticAlgorithm/distillation/GeneticAlgorithm/Parameters.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/NeuralNetwork/Train.py" beforeDir="false" afterPath="$PROJECT_DIR$/NeuralNetwork/Train.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

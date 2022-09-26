@@ -45,13 +45,13 @@ class GeneticAlgorithmMain(object):
         optimizer = torch.optim.Adam
         scheduler = torch.optim.lr_scheduler.OneCycleLR
         max_lr = 0.003
-        grad_clip = 0.1  # 0.001 in the feature map distill
+        grad_clip = 0.1  # 0.1 in the feature map distill
         weight_decay = 0
 
         distill_optimizer = torch.optim.Adam
         distill_lr = 0.001
         kd_loss_type = 'cosine'
-        numOfBatchesToDistill = 5
+        numOfBatchesToDistill = 40
 
         heuristicToLayerDict = {
             'a': 1,

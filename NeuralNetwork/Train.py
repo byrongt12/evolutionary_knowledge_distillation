@@ -320,7 +320,7 @@ def train_model_with_distillation(heuristicString, heuristicToLayerDict, epochs,
                     kd_loss.backward(retain_graph=True)
 
                 if grad_clip:
-                    nn.utils.clip_grad_value_(student_model.parameters(), 0.001)
+                    nn.utils.clip_grad_value_(student_model.parameters(), 0.1)
 
                 distill_optimizer_implemented.step()
                 distill_optimizer_implemented.zero_grad()
